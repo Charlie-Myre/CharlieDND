@@ -492,7 +492,7 @@ function areKeysPressed(event, action) {
   addModifiers(MODIFIER_KEYS.CONTROL, event.ctrlKey);
   addModifiers("Meta", event.metaKey);
   addModifiers(MODIFIER_KEYS.SHIFT, event.shiftKey);
-  return game.keybindings.get("dnd5e", action).some(b => {
+  return game.keybindings.get("charliednd5e", action).some(b => {
     if ( game.keyboard.downKeys.has(b.key) && b.modifiers.every(m => activeModifiers[m]) ) return true;
     if ( b.modifiers.length ) return false;
     return activeModifiers[b.key];
@@ -774,7 +774,7 @@ function _convertSystemUnits(value, from, to, config, { message, strict }) {
  */
 function defaultUnits(type) {
   const settingKey = type === "travel" ? "metricLengthUnits" : `metric${type.capitalize()}Units`;
-  return CONFIG.DND5E.defaultUnits[type]?.[game.settings.get("dnd5e", settingKey) ? "metric" : "imperial"];
+  return CONFIG.DND5E.defaultUnits[type]?.[game.settings.get("charliednd5e", settingKey) ? "metric" : "imperial"];
 }
 
 /* -------------------------------------------- */
@@ -2141,7 +2141,7 @@ class BaseRestDialog extends Dialog5e {
    */
   get promptNewDay() {
     const duration = CONFIG.DND5E.restTypes[this.config.type]
-      ?.duration?.[game.settings.get("dnd5e", "restVariant")] ?? 0;
+      ?.duration?.[game.settings.get("charliednd5e", "restVariant")] ?? 0;
     // Only prompt if rest is longer than 10 minutes and less than 24 hours
     return (duration > 10) && (duration < 1440);
   }
@@ -2175,7 +2175,7 @@ class BaseRestDialog extends Dialog5e {
       hd: this.actor.system.attributes?.hd,
       hp: this.actor.system.attributes?.hp,
       isGroup: this.actor.type === "group",
-      variant: game.settings.get("dnd5e", "restVariant")
+      variant: game.settings.get("charliednd5e", "restVariant")
     };
     if ( this.promptNewDay ) context.fields.push({
       disabled: !!this.config.request,
@@ -2217,7 +2217,7 @@ class BaseRestDialog extends Dialog5e {
     }
 
     if ( this.isPartyGroup ) {
-      const restSettings = this.actor.getFlag("dnd5e", "restSettings") ?? {};
+      const restSettings = this.actor.getFlag("charliednd5e", "restSettings") ?? {};
       context.request = [
         {
           field: new BooleanField$O({
@@ -2259,7 +2259,7 @@ class BaseRestDialog extends Dialog5e {
     const data = foundry.utils.expandObject(formData.object);
     if ( this.isPartyGroup ) {
       data.targets = filteredKeys(data.targets ?? {});
-      this.actor.setFlag("dnd5e", "restSettings", data);
+      this.actor.setFlag("charliednd5e", "restSettings", data);
     }
     foundry.utils.mergeObject(this.config, data);
     this.#rested = true;
@@ -2329,7 +2329,7 @@ class LongRestDialog extends BaseRestDialog {
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
 
-    const { enabled } = game.settings.get("dnd5e", "bastionConfiguration");
+    const { enabled } = game.settings.get("charliednd5e", "bastionConfiguration");
     if ( game.user.isGM && context.isGroup && enabled ) context.fields.unshift({
       field: new BooleanField$N({ label: game.i18n.localize("DND5E.Bastion.Action.BastionTurn") }),
       input: context.inputs.createCheckboxInput,
@@ -2831,8 +2831,8 @@ class BaseCalendarHUD extends Application5e {
    * @type {boolean}
    */
   static get shouldDisplay() {
-    return (game.settings.get("dnd5e", "calendarConfig")?.enabled || false)
-      && (game.settings.get("dnd5e", "calendarPreferences")?.visible || false);
+    return (game.settings.get("charliednd5e", "calendarConfig")?.enabled || false)
+      && (game.settings.get("charliednd5e", "calendarPreferences")?.visible || false);
   }
 
   /* -------------------------------------------- */
@@ -3200,7 +3200,7 @@ class CalendarHUD extends BaseCalendarHUD {
    * @param {CalendarTimeDeltas} [deltas={}]  Information on the time change deltas.
    */
   async renderCore(deltas={}) {
-    const prefs = game.settings.get("dnd5e", "calendarPreferences");
+    const prefs = game.settings.get("charliednd5e", "calendarPreferences");
     const dateFormatter = CONFIG.DND5E.calendar.formatters.find(f => f.value === prefs.formatters.date);
     this.element.querySelector(".calendar-date").innerText = dateFormatter ? game.time.calendar.format(
       game.time.components, dateFormatter.formatter
@@ -4613,7 +4613,7 @@ class SourceField extends SchemaField$11 {
   static prepareData(uuid) {
     const collection = foundry.utils.parseUuid(uuid)?.collection;
     const pkg = SourceField.getPackage(collection);
-    this.bookPlaceholder = collection?.metadata?.flags?.dnd5e?.sourceBook ?? SourceField.getModuleBook(pkg) ?? "";
+    this.bookPlaceholder = collection?.metadata?.flags?.charliednd5e?.sourceBook ?? SourceField.getModuleBook(pkg) ?? "";
     if ( !this.book ) this.book = this.bookPlaceholder;
 
     if ( this.custom ) this.label = this.custom;
@@ -4643,7 +4643,7 @@ class SourceField extends SchemaField$11 {
    */
   static getModuleBook(pkg) {
     if ( !pkg ) return null;
-    const sourceBooks = pkg.flags?.dnd5e?.sourceBooks;
+    const sourceBooks = pkg.flags?.charliednd5e?.sourceBooks;
     const keys = Object.keys(sourceBooks ?? {});
     if ( keys.length !== 1 ) return null;
     return keys[0];
@@ -5214,7 +5214,7 @@ class ActivityChoiceDialog extends Application5e {
   /** @inheritDoc */
   async _prepareContext(options) {
     let controlHint;
-    if ( game.settings.get("dnd5e", "controlHints") ) {
+    if ( game.settings.get("charliednd5e", "controlHints") ) {
       controlHint = game.i18n.localize("DND5E.Controls.Activity.FastForwardHint");
       controlHint = controlHint.replace(
         "<left-click>",
@@ -6754,7 +6754,7 @@ class Advancement extends PseudoDocumentMixin(BaseAdvancementData) {
   /** @inheritDoc */
   async delete(options={}) {
     if ( this.item.actor?.system.metadata?.supportsAdvancement
-        && !game.settings.get("dnd5e", "disableAdvancements") ) {
+        && !game.settings.get("charliednd5e", "disableAdvancements") ) {
       const manager = dnd5e.applications.advancement.AdvancementManager
         .forDeletedAdvancement(this.item.actor, this.item.id, this.id);
       if ( manager.steps.length ) return manager.render(true);
@@ -6826,9 +6826,9 @@ class Advancement extends PseudoDocumentMixin(BaseAdvancementData) {
     return source.clone({
       _stats,
       _id: id ?? foundry.utils.randomID(),
-      "flags.dnd5e.sourceId": uuid,
-      "flags.dnd5e.advancementOrigin": advancementOrigin,
-      "flags.dnd5e.advancementRoot": this.item.getFlag("dnd5e", "advancementRoot") ?? advancementOrigin
+      "flags.charliednd5e.sourceId": uuid,
+      "flags.charliednd5e.advancementOrigin": advancementOrigin,
+      "flags.charliednd5e.advancementRoot": this.item.getFlag("charliednd5e", "advancementRoot") ?? advancementOrigin
     }, { keepId: true }).toObject();
   }
 
@@ -7599,7 +7599,7 @@ class AdvancementManager extends Application5e {
         // Apply changes based on step type
         if ( (type === "delete") && this.step.item ) {
           if ( this.step.flow?.retainedData?.retainedItems ) {
-            this.step.flow.retainedData.retainedItems[this.step.item.flags.dnd5e?.sourceId] = this.step.item.toObject();
+            this.step.flow.retainedData.retainedItems[this.step.item.flags.charliednd5e?.sourceId] = this.step.item.toObject();
           }
           this.clone.items.delete(this.step.item.id);
         } else if ( (type === "delete") && this.step.advancement ) {
@@ -10422,7 +10422,7 @@ let ItemDataModel$1 = class ItemDataModel extends SystemDataModel$1 {
    * @type {Item5e|void}
    */
   get advancementRootItem() {
-    return this.parent?.actor?.items.get(this.parent.getFlag("dnd5e", "advancementRoot")?.split(".")?.[0]);
+    return this.parent?.actor?.items.get(this.parent.getFlag("charliednd5e", "advancementRoot")?.split(".")?.[0]);
   }
 
   /* -------------------------------------------- */
@@ -10510,7 +10510,7 @@ let ItemDataModel$1 = class ItemDataModel extends SystemDataModel$1 {
   prepareBaseData() {
     if ( this.parent.isEmbedded && this.parent.actor?.items.has(this.parent.id) ) {
       this.parent.actor.identifiedItems?.set(this.parent.identifier, this.parent);
-      const sourceId = this.parent._stats.compendiumSource ?? this.parent.flags.dnd5e?.sourceId;
+      const sourceId = this.parent._stats.compendiumSource ?? this.parent.flags.charliednd5e?.sourceId;
       if ( sourceId ) this.parent.actor.sourcedItems?.set(sourceId, this.parent);
     }
   }
@@ -10568,7 +10568,7 @@ let ItemDataModel$1 = class ItemDataModel extends SystemDataModel$1 {
     const context = {
       name, type, img, price, weight, uses, school, materials,
       config: CONFIG.DND5E,
-      controlHints: game.settings.get("dnd5e", "controlHints"),
+      controlHints: game.settings.get("charliednd5e", "controlHints"),
       labels: foundry.utils.deepClone((activity ?? this.parent).labels),
       tags: this.parent.labels?.components?.tags,
       subtitle: this.tooltipSubtitle.filterJoin(" • "),
@@ -10579,7 +10579,7 @@ let ItemDataModel$1 = class ItemDataModel extends SystemDataModel$1 {
         chat: await TextEditor$c.enrichHTML(chat ?? "", {
           rollData, relativeTo: this.parent, ...enrichmentOptions
         }),
-        concealed: game.user.isGM && game.settings.get("dnd5e", "concealItemDescriptions") && !description.chat
+        concealed: game.user.isGM && game.settings.get("charliednd5e", "concealItemDescriptions") && !description.chat
       }
     };
 
@@ -11034,7 +11034,7 @@ class ItemDescriptionTemplate extends SystemDataModel$1 {
    * Prepare the source label.
    */
   prepareDescriptionData() {
-    const uuid = this.parent.flags.dnd5e?.sourceId ?? this.parent._stats?.compendiumSource ?? this.parent.uuid;
+    const uuid = this.parent.flags.charliednd5e?.sourceId ?? this.parent._stats?.compendiumSource ?? this.parent.uuid;
     SourceField.prepareData.call(this.source, uuid);
   }
 
@@ -11661,7 +11661,7 @@ class UsesField extends SchemaField$V {
           : { item: this.item.id, keyPath: `system.activities.${this.id}.uses.spent` };
         roll = new CONFIG.Dice.BasicRoll(profile.formula, rollData, { delta });
         if ( ["day", "dawn", "dusk"].includes(profile.period)
-          && (game.settings.get("dnd5e", "restVariant") === "gritty") ) {
+          && (game.settings.get("charliednd5e", "restVariant") === "gritty") ) {
           roll.alter(7, 0, { multiplyNumeric: true });
         }
         total = (await roll.evaluate()).total;
@@ -11971,7 +11971,7 @@ class BaseActivityData extends foundry.abstract.DataModel {
    * @type {boolean}
    */
   get isRider() {
-    return !!this.item.getFlag("dnd5e", "riders.activity")?.includes(this.id);
+    return !!this.item.getFlag("charliednd5e", "riders.activity")?.includes(this.id);
   }
 
   /* -------------------------------------------- */
@@ -11981,7 +11981,7 @@ class BaseActivityData extends foundry.abstract.DataModel {
    * @type {boolean}
    */
   get isScaledScroll() {
-    return !!this.item.getFlag("dnd5e", "spellLevel");
+    return !!this.item.getFlag("charliednd5e", "spellLevel");
   }
 
   /* -------------------------------------------- */
@@ -12072,7 +12072,7 @@ class BaseActivityData extends foundry.abstract.DataModel {
       uses: this.transformUsesData(source, options)
     }, options);
     foundry.utils.setProperty(source, `system.activities.${activityData._id}`, activityData);
-    foundry.utils.setProperty(source, "flags.dnd5e.persistSourceMigration", true);
+    foundry.utils.setProperty(source, "flags.charliednd5e.persistSourceMigration", true);
   }
 
   /* -------------------------------------------- */
@@ -12235,7 +12235,7 @@ class BaseActivityData extends foundry.abstract.DataModel {
    */
   static transformEffectsData(source, options) {
     return source.effects
-      .filter(e => !e.transfer && (e.type !== "enchantment") && (e.flags?.dnd5e?.type !== "enchantment"))
+      .filter(e => !e.transfer && (e.type !== "enchantment") && (e.flags?.charliednd5e?.type !== "enchantment"))
       .map(e => ({ _id: e._id }));
   }
 
@@ -12572,7 +12572,7 @@ class BaseActivityData extends foundry.abstract.DataModel {
       if ( this.item.system.damageBonus ) parts.push(String(this.item.system.damageBonus));
     }
 
-    const lastType = this.item.getFlag("dnd5e", `last.${this.id}.damageType.${index}`);
+    const lastType = this.item.getFlag("charliednd5e", `last.${this.id}.damageType.${index}`);
 
     return {
       data, parts,
@@ -13610,7 +13610,7 @@ class ClassData extends ItemDataModel$1.mixin(
       needsMigration = true;
     }
 
-    if ( needsMigration ) foundry.utils.setProperty(source, "flags.dnd5e.persistSourceMigration", true);
+    if ( needsMigration ) foundry.utils.setProperty(source, "flags.charliednd5e.persistSourceMigration", true);
   }
 
   /* -------------------------------------------- */
@@ -13775,9 +13775,9 @@ class CurrencyTemplate extends SystemDataModel$1 {
    * @returns {number}
    */
   get currencyWeight() {
-    if ( !game.settings.get("dnd5e", "currencyWeight") ) return 0;
+    if ( !game.settings.get("charliednd5e", "currencyWeight") ) return 0;
     const count = Object.values(this.currency).reduce((count, value) => count + value, 0);
-    const currencyPerWeight = game.settings.get("dnd5e", "metricWeightUnits")
+    const currencyPerWeight = game.settings.get("charliednd5e", "metricWeightUnits")
       ? CONFIG.DND5E.encumbrance.currencyPerWeight.metric
       : CONFIG.DND5E.encumbrance.currencyPerWeight.imperial;
     return count / currencyPerWeight;
@@ -14344,8 +14344,8 @@ class PhysicalItemTemplate extends SystemDataModel$1 {
   async asGear() {
     if ( !this.properties?.has("gear") ) return this.parent;
     let clone;
-    const change = { "flags.dnd5e.gearSource": this.parent.uuid };
-    const flags = this.parent.getFlag("dnd5e", "gear") ?? {};
+    const change = { "flags.charliednd5e.gearSource": this.parent.uuid };
+    const flags = this.parent.getFlag("charliednd5e", "gear") ?? {};
     if ( this.metadata.compendiumGearSource && this.parent._stats.compendiumSource && (flags.preserve !== true) ) {
       const item = await fromUuid(this.parent._stats.compendiumSource);
       const name = (flags.preserveName === true ? this.parent._source.name : flags.preserveName) ?? item?.name;
@@ -14382,7 +14382,7 @@ class PhysicalItemTemplate extends SystemDataModel$1 {
    */
   gearPresentationData() {
     const compendiumSrc = fromUuidSync(this.parent._stats.compendiumSource, { strict: false });
-    const flags = this.parent.getFlag("dnd5e", "gear") ?? {};
+    const flags = this.parent.getFlag("charliednd5e", "gear") ?? {};
     const useCompendiumCopy = this.metadata.compendiumGearSource && compendiumSrc && (flags.preserve !== true);
     const enchantment = this.parent.effects.get(flags.effectId);
 
@@ -14395,7 +14395,7 @@ class PhysicalItemTemplate extends SystemDataModel$1 {
     // If persevered name specified, display preserved name outside with special name(?) inside
     //   (e.g. "Stacy (Longsword +1)")
     if ( flags.preserveName ) {
-      const namePattern = enchantment?.flags.dnd5e?.namePattern;
+      const namePattern = enchantment?.flags.charliednd5e?.namePattern;
       const nameOuter = flags.preserveName === true ? this.parent._source.name : flags.preserveName;
       const nameInner = namePattern ? namePattern.replace("{}", name) : name;
       if ( nameOuter !== nameInner ) {
@@ -14689,7 +14689,7 @@ class ContainerData extends ItemDataModel$1.mixin(
    */
   static _migrateWeightlessData(source) {
     if ( foundry.utils.getProperty(source, "system.capacity.weightless") === true ) {
-      foundry.utils.setProperty(source, "flags.dnd5e.migratedProperties", ["weightlessContents"]);
+      foundry.utils.setProperty(source, "flags.charliednd5e.migratedProperties", ["weightlessContents"]);
     }
   }
 
@@ -15808,7 +15808,7 @@ class ActivityUsageDialog extends Dialog5e {
   /** @inheritDoc */
   async _prepareContext(options) {
     if ( "scaling" in this.config ) {
-      this.#item = this.#item.clone({ "flags.dnd5e.scaling": this.config.scaling }, { keepId: true });
+      this.#item = this.#item.clone({ "flags.charliednd5e.scaling": this.config.scaling }, { keepId: true });
     }
     return {
       ...await super._prepareContext(options),
@@ -15841,7 +15841,7 @@ class ActivityUsageDialog extends Dialog5e {
    * @protected
    */
   async _prepareConcentrationContext(context, options) {
-    if ( !this.activity.requiresConcentration || game.settings.get("dnd5e", "disableConcentration")
+    if ( !this.activity.requiresConcentration || game.settings.get("charliednd5e", "disableConcentration")
       || !this._shouldDisplay("concentration") ) return context;
     context.hasConcentration = true;
     context.notes = [];
@@ -15854,7 +15854,7 @@ class ActivityUsageDialog extends Dialog5e {
     }];
     if ( this.config.concentration?.begin ) {
       const existingConcentration = Array.from(this.actor.concentration.effects).map(effect => {
-        const data = effect.getFlag("dnd5e", "item");
+        const data = effect.getFlag("charliednd5e", "item");
         return {
           value: effect.id,
           label: data?.data?.name ?? this.actor.items.get(data?.id)?.name
@@ -16278,7 +16278,7 @@ class AbilityTemplate extends foundry.canvas.placeables.MeasuredTemplate {
       x: 0,
       y: 0,
       fillColor: game.user.color,
-      flags: { dnd5e: {
+      flags: { charliednd5e: {
         dimensions: {
           size: target.size,
           width: target.width,
@@ -16298,7 +16298,7 @@ class AbilityTemplate extends foundry.canvas.placeables.MeasuredTemplate {
         break;
       case "rect": // 5e rectangular AoEs are always cubes
         templateData.width = target.size;
-        if ( game.settings.get("dnd5e", "gridAlignedSquareTemplates") ) {
+        if ( game.settings.get("charliednd5e", "gridAlignedSquareTemplates") ) {
           templateData.distance = Math.hypot(target.size, target.size);
           templateData.direction = 45;
         } else {
@@ -16430,8 +16430,8 @@ class AbilityTemplate extends foundry.canvas.placeables.MeasuredTemplate {
     const updates = this.getSnappedPosition(center);
 
     // Adjust template size to take hovered token into account if `adjustedSize` is set
-    const baseDistance = this.document.flags.dnd5e?.dimensions?.size;
-    if ( this.document.flags.dnd5e?.dimensions?.adjustedSize && baseDistance ) {
+    const baseDistance = this.document.flags.charliednd5e?.dimensions?.size;
+    if ( this.document.flags.charliednd5e?.dimensions?.adjustedSize && baseDistance ) {
       const rectangle = new PIXI.Rectangle(center.x, center.y, 1, 1);
       const hoveredToken = canvas.tokens.quadtree.getObjects(rectangle, {
         collisionTest: ({ t }) => t.visible && !t.document.isSecret }).first();
@@ -16634,8 +16634,8 @@ function DependentDocumentMixin(Base) {
     /** @inheritDoc */
     prepareData() {
       super.prepareData();
-      if ( this.flags?.dnd5e?.dependentOn && this.uuid ) {
-        dnd5e.registry.dependents.track(this.flags.dnd5e.dependentOn, this);
+      if ( this.flags?.charliednd5e?.dependentOn && this.uuid ) {
+        dnd5e.registry.dependents.track(this.flags.charliednd5e.dependentOn, this);
       }
     }
 
@@ -16644,8 +16644,8 @@ function DependentDocumentMixin(Base) {
     /** @inheritDoc */
     _onDelete(options, userId) {
       super._onDelete(options, userId);
-      if ( this.flags?.dnd5e?.dependentOn && this.uuid ) {
-        dnd5e.registry.dependents.untrack(this.flags.dnd5e.dependentOn, this);
+      if ( this.flags?.charliednd5e?.dependentOn && this.uuid ) {
+        dnd5e.registry.dependents.untrack(this.flags.charliednd5e.dependentOn, this);
       }
     }
   }
@@ -16769,7 +16769,7 @@ function ActivityMixin(Base) {
      * @type {ActiveEffect5e|null}
      */
     get dependentOrigin() {
-      return this.item.effects.get(this.flags?.dnd5e?.dependentOn) ?? null;
+      return this.item.effects.get(this.flags?.charliednd5e?.dependentOn) ?? null;
     }
 
     /* -------------------------------------------- */
@@ -16845,7 +16845,7 @@ function ActivityMixin(Base) {
         create: true,
         data: {
           flags: {
-            dnd5e: this.messageFlags
+            charliednd5e: this.messageFlags
           },
           system: {
             effects: this.applicableEffects?.map(e => `.ActiveEffect.${e.id}`)
@@ -16886,7 +16886,7 @@ function ActivityMixin(Base) {
 
       // Create concentration effect & end previous effects
       if ( usageConfig.concentration?.begin ) {
-        const effect = await item.actor.beginConcentrating(activity, { "flags.dnd5e.scaling": usageConfig.scaling });
+        const effect = await item.actor.beginConcentrating(activity, { "flags.charliednd5e.scaling": usageConfig.scaling });
         if ( effect ) {
           results.effects ??= [];
           results.effects.push(effect);
@@ -16920,7 +16920,7 @@ function ActivityMixin(Base) {
       if ( usageConfig.subsequentActions !== false ) {
         const deltas = results.message?.system?.deltas ?? results.message?.data?.system?.deltas;
         const consumed = this.createConsumedFlag(this.actor, deltas);
-        if ( consumed ) item.updateSource({ "flags.dnd5e.consumed": consumed });
+        if ( consumed ) item.updateSource({ "flags.charliednd5e.consumed": consumed });
         activity._triggerSubsequentActions(usageConfig, results);
       }
 
@@ -17085,7 +17085,7 @@ function ActivityMixin(Base) {
           || (!linked && hasSpellSlotConsumption);
       }
 
-      const levelingFlag = this.item.getFlag("dnd5e", "spellLevel");
+      const levelingFlag = this.item.getFlag("charliednd5e", "spellLevel");
       if ( levelingFlag ) {
         // Handle fixed scaling from spell scrolls
         config.scaling = false;
@@ -17112,13 +17112,13 @@ function ActivityMixin(Base) {
         config.scaling ??= 0;
       }
 
-      if ( this.requiresConcentration && !game.settings.get("dnd5e", "disableConcentration") ) {
+      if ( this.requiresConcentration && !game.settings.get("charliednd5e", "disableConcentration") ) {
         config.concentration ??= {};
         config.concentration.begin ??= true;
         const { effects } = this.actor.concentration;
         const limit = this.actor.system.attributes?.concentration?.limit ?? 0;
         if ( limit && (limit <= effects.size) ) config.concentration.end ??= effects.find(e => {
-          const data = e.flags.dnd5e?.item?.data ?? {};
+          const data = e.flags.charliednd5e?.item?.data ?? {};
           return (data === this.id) || (data._id === this.id);
         })?.id ?? effects.first()?.id ?? null;
       }
@@ -17142,7 +17142,7 @@ function ActivityMixin(Base) {
      * @protected
      */
     async _prepareUsageScaling(usageConfig, messageConfig, item) {
-      const levelingFlag = this.item.getFlag("dnd5e", "spellLevel");
+      const levelingFlag = this.item.getFlag("charliednd5e", "spellLevel");
       if ( levelingFlag ) {
         usageConfig.scaling = Math.max(0, levelingFlag.value - levelingFlag.base);
       } else if ( this.isSpell ) {
@@ -17155,9 +17155,9 @@ function ActivityMixin(Base) {
 
       if ( usageConfig.scaling ) {
         foundry.utils.setProperty(messageConfig, "data.system.scaling", usageConfig.scaling);
-        if ( usageConfig.scaling !== item.flags.dnd5e?.scaling ) {
+        if ( usageConfig.scaling !== item.flags.charliednd5e?.scaling ) {
           item.actor._embeddedPreparation = true;
-          item.updateSource({ "flags.dnd5e.scaling": usageConfig.scaling });
+          item.updateSource({ "flags.charliednd5e.scaling": usageConfig.scaling });
           delete item.actor._embeddedPreparation;
           item.prepareFinalAttributes();
         }
@@ -17243,7 +17243,7 @@ function ActivityMixin(Base) {
             const otherLinkedActivity = linkedActivity.type === "forward"
               ? linkedActivity.item.system.activities.get(linkedActivity.activity.id) : linkedActivity;
             if ( updates.delete.includes(linkedActivity.item.id)
-              && (this.item.getFlag("dnd5e", "cachedFor") === otherLinkedActivity?.relativeUUID) ) {
+              && (this.item.getFlag("charliednd5e", "cachedFor") === otherLinkedActivity?.relativeUUID) ) {
               updates.delete.push(this.item.id);
             }
           } else if ( results?.length ) {
@@ -17536,7 +17536,7 @@ function ActivityMixin(Base) {
         data: {
           flavor: `${this.item.name} - ${this.damageFlavor}`,
           flags: {
-            dnd5e: {
+            charliednd5e: {
               ...this.messageFlags,
               messageType: "roll",
               roll: { type: "damage" }
@@ -17556,7 +17556,7 @@ function ActivityMixin(Base) {
       }, {});
       if ( canUpdate && !foundry.utils.isEmpty(lastDamageTypes)
         && (this.actor && this.actor.items.has(this.item.id)) ) {
-        await this.item.setFlag("dnd5e", `last.${this.id}.damageType`, lastDamageTypes);
+        await this.item.setFlag("charliednd5e", `last.${this.id}.damageType`, lastDamageTypes);
       }
 
       /**
@@ -17655,7 +17655,7 @@ function ActivityMixin(Base) {
       const consumed = this.createConsumedFlag(message.getAssociatedActor(), message.system.deltas);
       const scaling = message.system.scaling ?? 0;
       const item = (consumed || scaling) ? this.item.clone({
-        "flags.dnd5e": { consumed, scaling }
+        "flags.charliednd5e": { consumed, scaling }
       }, { keepId: true }) : this.item;
       const activity = item.system.activities.get(this.id);
 
@@ -17818,7 +17818,7 @@ function ActivityMixin(Base) {
      */
     getLinkedActivity(relativeUUID) {
       if ( !this.actor ) return null;
-      relativeUUID ??= this.item.getFlag("dnd5e", "cachedFor");
+      relativeUUID ??= this.item.getFlag("charliednd5e", "cachedFor");
       return fromUuidSync(relativeUUID, { relative: this.actor, strict: false });
     }
 
@@ -17832,7 +17832,7 @@ function ActivityMixin(Base) {
     getRollData(options) {
       const rollData = this.item.getRollData(options);
       rollData.activity = { ...this };
-      rollData.consumed = this.item.flags.dnd5e?.consumed;
+      rollData.consumed = this.item.flags.charliednd5e?.consumed;
       rollData.mod = this.actor?.system.abilities?.[this.ability]?.mod ?? 0;
       return rollData;
     }
@@ -17936,7 +17936,7 @@ class CastActivity extends ActivityMixin(BaseCastActivityData) {
    */
   get cachedSpell() {
     return this.actor?.sourcedItems.get(this.spell.uuid)
-      ?.find(i => i.getFlag("dnd5e", "cachedFor") === this.relativeUUID);
+      ?.find(i => i.getFlag("charliednd5e", "cachedFor") === this.relativeUUID);
   }
 
   /* -------------------------------------------- */
@@ -18017,7 +18017,7 @@ class CastActivity extends ActivityMixin(BaseCastActivityData) {
         }
       ],
       flags: {
-        dnd5e: {
+        charliednd5e: {
           cachedFor: this.relativeUUID
         }
       },
@@ -18317,7 +18317,7 @@ class ActivitiesTemplate extends SystemDataModel$1 {
     if ( this.#shouldCreateInitialActivity(source) ) this.#createInitialActivity(source);
     const uses = source.system?.uses ?? {};
     if ( source._id && source.type && ("value" in uses) && uses.max ) {
-      foundry.utils.setProperty(source, "flags.dnd5e.migratedUses", uses.value);
+      foundry.utils.setProperty(source, "flags.charliednd5e.migratedUses", uses.value);
     }
   }
 
@@ -18418,7 +18418,7 @@ class ActivitiesTemplate extends SystemDataModel$1 {
   async recoverUses(periods, rollData) {
     const updates = {};
     const rolls = [];
-    const autoRecharge = game.settings.get("dnd5e", "autoRecharge");
+    const autoRecharge = game.settings.get("charliednd5e", "autoRecharge");
     const shouldRecharge = periods.includes("turnStart") && this.parent.actor.system.isNPC && (autoRecharge !== "no");
     const recharge = async doc => {
       const config = { apply: false };
@@ -18495,9 +18495,9 @@ class ActivitiesTemplate extends SystemDataModel$1 {
       return riders;
     }, { activity: new Set(), effect: new Set() });
     if ( !riders.activity.size && !riders.effect.size ) {
-      foundry.utils.setProperty(changed, "flags.dnd5e.-=riders", null);
+      foundry.utils.setProperty(changed, "flags.charliednd5e.-=riders", null);
     } else {
-      foundry.utils.setProperty(changed, "flags.dnd5e.riders", Object.entries(riders)
+      foundry.utils.setProperty(changed, "flags.charliednd5e.riders", Object.entries(riders)
         .reduce((updates, [key, value]) => {
           if ( value.size ) updates[key] = Array.from(value);
           else updates[`-=${key}`] = null;
@@ -18930,7 +18930,7 @@ class EquipmentData extends ItemDataModel$1.mixin(
    */
   static _migrateStealth(source) {
     if ( foundry.utils.getProperty(source, "system.stealth") === true ) {
-      foundry.utils.setProperty(source, "flags.dnd5e.migratedProperties", ["stealthDisadvantage"]);
+      foundry.utils.setProperty(source, "flags.charliednd5e.migratedProperties", ["stealthDisadvantage"]);
     }
   }
 
@@ -19142,7 +19142,7 @@ class Award extends Application5e {
     }, {});
     context.destinations = Award.prepareDestinations(this.transferDestinations, this.award.savedDestinations);
     context.each = this.award.each ?? false;
-    context.hideXP = game.settings.get("dnd5e", "levelingMode") === "noxp";
+    context.hideXP = game.settings.get("charliednd5e", "levelingMode") === "noxp";
     context.noPrimaryParty = !game.actors.party && !this.isPartyAward;
     context.xp = this.award.xp ?? this.origin?.system.details?.xp?.value;
 
@@ -19233,7 +19233,7 @@ class Award extends Application5e {
    */
   _saveDestinations(destinations) {
     const target = this.isPartyAward ? this.origin : game.user;
-    target.setFlag("dnd5e", "awardDestinations", destinations);
+    target.setFlag("charliednd5e", "awardDestinations", destinations);
   }
 
   /* -------------------------------------------- */
@@ -19422,7 +19422,7 @@ class Award extends Application5e {
 
       // Otherwise show the UI with defaults
       else {
-        const savedDestinations = game.user.getFlag("dnd5e", "awardDestinations");
+        const savedDestinations = game.user.getFlag("charliednd5e", "awardDestinations");
         const app = new Award({ award: { currency, xp, each, savedDestinations } });
         app.render({ force: true });
       }
@@ -20399,7 +20399,7 @@ async function rollAttack(config, event) {
   const messageConfig = {
     data: {
       flags: {
-        dnd5e: {
+        charliednd5e: {
           messageType: "roll",
           roll: { type: "attack" }
         }
@@ -21176,7 +21176,7 @@ async function rollDamage(config, event) {
     create: true,
     data: {
       flags: {
-        dnd5e: {
+        charliednd5e: {
           messageType: "roll",
           roll: { type: rollType },
           targets: getTargetDescriptors()
@@ -21871,7 +21871,7 @@ function _addListeners(buttons, handler) {
 async function _fetchActivity(uuid, scaling) {
   const activity = await fromUuid(uuid);
   if ( !activity || !scaling ) return activity;
-  const item = activity.item.clone({ "flags.dnd5e.scaling": scaling }, { keepId: true });
+  const item = activity.item.clone({ "flags.charliednd5e.scaling": scaling }, { keepId: true });
   return item.system.activities.get(activity.id);
 }
 
@@ -22124,7 +22124,7 @@ class SpellData extends ItemDataModel$1.mixin(ActivitiesTemplate, ItemDescriptio
 
   /** @override */
   get criticalThreshold() {
-    return this.parent?.actor?.flags.dnd5e?.spellCriticalThreshold ?? Infinity;
+    return this.parent?.actor?.flags.charliednd5e?.spellCriticalThreshold ?? Infinity;
   }
 
   /* -------------------------------------------- */
@@ -22135,13 +22135,13 @@ class SpellData extends ItemDataModel$1.mixin(ActivitiesTemplate, ItemDescriptio
    */
   get linkedActivity() {
     const relative = this.parent.actor;
-    const uuid = this.parent.getFlag("dnd5e", "cachedFor");
+    const uuid = this.parent.getFlag("charliednd5e", "cachedFor");
     if ( !relative || !uuid ) return null;
     const data = foundry.utils.parseUuid(uuid, { relative });
     const [itemId, , activityId] = (data?.embedded ?? []).slice(-3);
     return relative.items.get(itemId)?.system.activities?.get(activityId) ?? null;
     // TODO: Swap back to fromUuidSync once https://github.com/foundryvtt/foundryvtt/issues/11214 is resolved
-    // return fromUuidSync(this.parent.getFlag("dnd5e", "cachedFor"), { relative, strict: false }) ?? null;
+    // return fromUuidSync(this.parent.getFlag("charliednd5e", "cachedFor"), { relative, strict: false }) ?? null;
   }
 
   /* -------------------------------------------- */
@@ -22209,7 +22209,7 @@ class SpellData extends ItemDataModel$1.mixin(ActivitiesTemplate, ItemDescriptio
   static _migrateComponentData(source) {
     const components = filteredKeys(source.system?.components ?? {});
     if ( components.length ) {
-      foundry.utils.setProperty(source, "flags.dnd5e.migratedProperties", components);
+      foundry.utils.setProperty(source, "flags.charliednd5e.migratedProperties", components);
     }
   }
 
@@ -22419,7 +22419,7 @@ class SpellData extends ItemDataModel$1.mixin(ActivitiesTemplate, ItemDescriptio
         // Fallback to detecting from flags.
         if ( !grantingItem ) {
           // Check for advancement-granted spells.
-          const advancementOrigin = this.parent.getFlag("dnd5e", "advancementOrigin");
+          const advancementOrigin = this.parent.getFlag("charliednd5e", "advancementOrigin");
           if ( advancementOrigin ) {
             const [itemId] = advancementOrigin.split(".");
             grantingItem = this.parent.actor.items.get(itemId);
@@ -22534,7 +22534,7 @@ class SpellData extends ItemDataModel$1.mixin(ActivitiesTemplate, ItemDescriptio
   /** @inheritDoc */
   getRollData(...options) {
     const data = super.getRollData(...options);
-    data.item.level = data.item.level + (this.parent.getFlag("dnd5e", "scaling")
+    data.item.level = data.item.level + (this.parent.getFlag("charliednd5e", "scaling")
       ?? (this.level !== 0 ? this.scalingIncrease : 0));
     return data;
   }
@@ -22851,10 +22851,23 @@ function SystemFlagsMixin(Base) {
     /* -------------------------------------------- */
 
     /** @inheritDoc */
+    _initializeSource(source, options={}) {
+      if ( source?.flags?.dnd5e ) {
+        source.flags.charliednd5e = foundry.utils.mergeObject(
+          source.flags.dnd5e, source.flags.charliednd5e ?? {}, { inplace: false }
+        );
+        delete source.flags.dnd5e;
+      }
+      return super._initializeSource(source, options);
+    }
+
+    /* -------------------------------------------- */
+
+    /** @inheritDoc */
     prepareData() {
       super.prepareData();
-      if ( ("dnd5e" in this.flags) && this._systemFlagsDataModel ) {
-        this.flags.dnd5e = new this._systemFlagsDataModel(this._source.flags.dnd5e, { parent: this });
+      if ( ("charliednd5e" in this.flags) && this._systemFlagsDataModel ) {
+        this.flags.charliednd5e = new this._systemFlagsDataModel(this._source.flags.charliednd5e, { parent: this });
       }
     }
 
@@ -22862,12 +22875,12 @@ function SystemFlagsMixin(Base) {
 
     /** @inheritDoc */
     async setFlag(scope, key, value) {
-      if ( (scope === "dnd5e") && this._systemFlagsDataModel ) {
+      if ( (scope === "charliednd5e") && this._systemFlagsDataModel ) {
         let diff;
         const changes = foundry.utils.expandObject({ [key]: value });
-        if ( this.flags.dnd5e ) diff = this.flags.dnd5e.updateSource(changes, { dryRun: true });
+        if ( this.flags.charliednd5e ) diff = this.flags.charliednd5e.updateSource(changes, { dryRun: true });
         else diff = new this._systemFlagsDataModel(changes, { parent: this }).toObject();
-        return this.update({ flags: { dnd5e: diff } });
+        return this.update({ flags: { charliednd5e: diff } });
       }
       return super.setFlag(scope, key, value);
     }
@@ -22972,7 +22985,7 @@ class Item5e extends SystemDocumentMixin(Item) {
     // Migrate backpack -> container.
     if ( data.type === "backpack" ) {
       data.type = "container";
-      foundry.utils.setProperty(data, "flags.dnd5e.persistSourceMigration", true);
+      foundry.utils.setProperty(data, "flags.charliednd5e.persistSourceMigration", true);
     }
 
     /**
@@ -23024,7 +23037,7 @@ class Item5e extends SystemDocumentMixin(Item) {
    * @type {boolean}
    */
   get canDelete() {
-    return !this.flags.dnd5e?.cachedFor;
+    return !this.flags.charliednd5e?.cachedFor;
   }
 
   /* -------------------------------------------- */
@@ -23035,7 +23048,7 @@ class Item5e extends SystemDocumentMixin(Item) {
    */
   get canDuplicate() {
     return !this.system.metadata?.singleton && !["class", "subclass"].includes(this.type)
-      && !this.flags.dnd5e?.cachedFor;
+      && !this.flags.charliednd5e?.cachedFor;
   }
 
   /* --------------------------------------------- */
@@ -23070,7 +23083,7 @@ class Item5e extends SystemDocumentMixin(Item) {
    * @type {ActiveEffect5e|null}
    */
   get dependentOrigin() {
-    return fromUuidSync(this.flags.dnd5e?.dependentOn, { relative: this, strict: false }) ?? null;
+    return fromUuidSync(this.flags.charliednd5e?.dependentOn, { relative: this, strict: false }) ?? null;
   }
 
   /* -------------------------------------------- */
@@ -23278,7 +23291,7 @@ class Item5e extends SystemDocumentMixin(Item) {
    * @type {number}
    */
   get scalingIncrease() {
-    return this.system?.scalingIncrease ?? this.getFlag("dnd5e", "scaling") ?? 0;
+    return this.system?.scalingIncrease ?? this.getFlag("charliednd5e", "scaling") ?? 0;
   }
 
   /* -------------------------------------------- */
@@ -24043,7 +24056,7 @@ class Item5e extends SystemDocumentMixin(Item) {
   /** @inheritDoc */
   async deleteDialog({ sheet, ...dialogOptions }={}, operation={}) {
     // If item has advancement, handle it separately
-    if ( this.actor?.system.metadata?.supportsAdvancement && !game.settings.get("dnd5e", "disableAdvancements") ) {
+    if ( this.actor?.system.metadata?.supportsAdvancement && !game.settings.get("charliednd5e", "disableAdvancements") ) {
       const manager = AdvancementManager.forDeletedItem(this.actor, this.id);
       if ( manager.steps.length ) {
         try {
@@ -24209,7 +24222,7 @@ class Item5e extends SystemDocumentMixin(Item) {
     }
 
     config = foundry.utils.mergeObject({
-      explanation: game.user.getFlag("dnd5e", "creation.scrollExplanation") ?? "reference",
+      explanation: game.user.getFlag("charliednd5e", "creation.scrollExplanation") ?? "reference",
       level: spell.system.level,
       values
     }, config);
@@ -24218,16 +24231,16 @@ class Item5e extends SystemDocumentMixin(Item) {
       const result = await CreateScrollDialog.create(spell, config);
       if ( !result ) return;
       foundry.utils.mergeObject(config, result);
-      await game.user.setFlag("dnd5e", "creation.scrollExplanation", config.explanation);
+      await game.user.setFlag("charliednd5e", "creation.scrollExplanation", config.explanation);
     }
 
     // Get spell data
     const itemData = (spell instanceof Item5e) ? spell.toObject() : spell;
     const flags = itemData.flags ?? {};
     if ( Number.isNumeric(config.level) ) {
-      flags.dnd5e ??= {};
-      flags.dnd5e.scaling = Math.max(0, config.level - spell.system.level);
-      flags.dnd5e.spellLevel = {
+      flags.charliednd5e ??= {};
+      flags.charliednd5e.scaling = Math.max(0, config.level - spell.system.level);
+      flags.charliednd5e.spellLevel = {
         value: config.level,
         base: spell.system.level
       };
@@ -24332,7 +24345,7 @@ class Item5e extends SystemDocumentMixin(Item) {
     const values = {};
 
     config = foundry.utils.mergeObject({
-      explanation: game.user.getFlag("dnd5e", "creation.scrollExplanation") ?? "reference",
+      explanation: game.user.getFlag("charliednd5e", "creation.scrollExplanation") ?? "reference",
       level: spell.system.level,
       values
     }, config);
@@ -24341,7 +24354,7 @@ class Item5e extends SystemDocumentMixin(Item) {
       const result = await CreateScrollDialog.create(spell, config);
       if ( !result ) return;
       foundry.utils.mergeObject(config, result);
-      await game.user.setFlag("dnd5e", "creation.scrollExplanation", config.explanation);
+      await game.user.setFlag("charliednd5e", "creation.scrollExplanation", config.explanation);
     }
 
     /**
@@ -24499,7 +24512,7 @@ const { ObjectField: ObjectField$1, SchemaField: SchemaField$I, SetField: SetFie
 /**
  * Extend the base ActiveEffect class to implement system-specific logic.
  */
-class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
+class ActiveEffect5e extends SystemFlagsMixin(DependentDocumentMixin(ActiveEffect)) {
 
   /**
    * The default icon used for newly created Active Effect documents.
@@ -24570,7 +24583,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
    */
   get dependentOrigin() {
     if ( !(this.parent instanceof Item) ) return null;
-    return this.parent.effects.get(this.flags.dnd5e?.dependentOn) ?? null;
+    return this.parent.effects.get(this.flags.charliednd5e?.dependentOn) ?? null;
   }
 
   /* -------------------------------------------- */
@@ -24593,7 +24606,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
     if ( this.target?.testUserPermission(game.user, "OBSERVER") ) return false;
 
     // Hide bloodied status effect from players unless the token is friendly
-    if ( (this.id === this.constructor.ID.BLOODIED) && (game.settings.get("dnd5e", "bloodied") === "player") ) {
+    if ( (this.id === this.constructor.ID.BLOODIED) && (game.settings.get("charliednd5e", "bloodied") === "player") ) {
       return this.target?.token?.disposition !== foundry.CONST.TOKEN_DISPOSITIONS.FRIENDLY;
     }
 
@@ -24617,7 +24630,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
 
   /** @inheritDoc */
   get isTemporary() {
-    return !this.isConcealed && (super.isTemporary || this.getFlag("dnd5e", "isTemporary"));
+    return !this.isConcealed && (super.isTemporary || this.getFlag("charliednd5e", "isTemporary"));
   }
 
   /* -------------------------------------------- */
@@ -24649,10 +24662,10 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
   _initializeSource(data, options={}) {
     if ( data instanceof foundry.abstract.DataModel ) data = data.toObject();
 
-    if ( data.flags?.dnd5e?.type === "enchantment" ) {
+    if ( data.flags?.charliednd5e?.type === "enchantment" ) {
       data.type = "enchantment";
-      delete data.flags.dnd5e.type;
-      foundry.utils.setProperty(data, "flags.dnd5e.persistSourceMigration", true);
+      delete data.flags.charliednd5e.type;
+      foundry.utils.setProperty(data, "flags.charliednd5e.persistSourceMigration", true);
     }
 
     return super._initializeSource(data, options);
@@ -24664,7 +24677,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
   static migrateData(data) {
     data = super.migrateData(data);
     for ( const change of data.changes ?? [] ) {
-      if ( change.key === "flags.dnd5e.initiativeAdv" ) {
+      if ( change.key === "flags.charliednd5e.initiativeAdv" ) {
         change.key = "system.attributes.init.roll.mode";
         change.mode = CONST.ACTIVE_EFFECT_MODES.ADD;
         change.value = 1;
@@ -24683,7 +24696,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
     change = this._applyChangeShim(change);
 
     // Ensure changes targeting flags use the proper types
-    if ( change.key.startsWith("flags.dnd5e.") ) change = this._prepareFlagChange(doc, change);
+    if ( change.key.startsWith("flags.charliednd5e.") ) change = this._prepareFlagChange(doc, change);
 
     // Properly handle formulas that don't exist as part of the data model
     if ( ActiveEffect5e.FORMULA_FIELDS.has(change.key) ) {
@@ -24705,7 +24718,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
   /** @inheritDoc */
   static applyChange(model, change, options={}) {
     change = change.effect._applyChangeShim(change);
-    if ( change.key.startsWith("flags.dnd5e.") ) change = change.effect._prepareFlagChange(model, change);
+    if ( change.key.startsWith("flags.charliednd5e.") ) change = change.effect._prepareFlagChange(model, change);
     if ( ActiveEffect5e.FORMULA_FIELDS.has(change.key) ) {
       const field = new FormulaField({ deterministic: change.key !== "system.damageBonus" });
       return { [change.key]: this.applyChangeField(model, change, { field }) };
@@ -24862,7 +24875,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
    */
   _prepareFlagChange(actor, change) {
     const { key, value } = change;
-    const data = CONFIG.DND5E.characterFlags[key.replace("flags.dnd5e.", "")];
+    const data = CONFIG.DND5E.characterFlags[key.replace("flags.charliednd5e.", "")];
     if ( !data ) return change;
 
     // Set flag to initial value if it isn't present
@@ -24910,7 +24923,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
    */
   _prepareExhaustionLevel() {
     const config = CONFIG.DND5E.conditionTypes.exhaustion;
-    let level = this.getFlag("dnd5e", "exhaustionLevel");
+    let level = this.getFlag("charliednd5e", "exhaustionLevel");
     if ( !Number.isFinite(level) ) level = 1;
     this.img = this.constructor._getExhaustionImage(level);
     this.name = `${game.i18n.localize("DND5E.Exhaustion")} ${level}`;
@@ -24945,7 +24958,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
   async createRiderConditions() {
     const riders = new Set();
 
-    for ( const status of this.getFlag("dnd5e", "riders.statuses") ?? [] ) {
+    for ( const status of this.getFlag("charliednd5e", "riders.statuses") ?? [] ) {
       riders.add(status);
     }
 
@@ -24983,7 +24996,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
       const message = game.messages.get(options?.chatMessageOrigin);
       item = message?.getAssociatedItem();
       const activity = message?.getAssociatedActivity();
-      profile = activity?.effects.find(e => e._id === message?.getFlag("dnd5e", "use.enchantmentProfile"));
+      profile = activity?.effects.find(e => e._id === message?.getFlag("charliednd5e", "use.enchantmentProfile"));
     } else if ( enchantmentProfile && activityId ) {
       let activity;
       const origin = await fromUuid(this.origin);
@@ -25006,7 +25019,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
       const activityData = item.system.activities.get(id)?.toObject();
       if ( !activityData ) continue;
       activityData._id = foundry.utils.randomID();
-      foundry.utils.setProperty(activityData, "flags.dnd5e.dependentOn", this.id);
+      foundry.utils.setProperty(activityData, "flags.charliednd5e.dependentOn", this.id);
       riderActivities[activityData._id] = activityData;
     }
     let createdActivities = [];
@@ -25023,13 +25036,13 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
       const effectData = item.effects.get(id)?.toObject();
       if ( effectData ) {
         delete effectData._id;
-        delete effectData.flags?.dnd5e?.rider;
+        delete effectData.flags?.charliednd5e?.rider;
         effectData.origin = this.origin;
       }
       return effectData;
     }));
     riderEffects = riderEffects.filter(_ => _);
-    riderEffects.forEach(e => foundry.utils.setProperty(e, "flags.dnd5e.dependentOn", this.id));
+    riderEffects.forEach(e => foundry.utils.setProperty(e, "flags.charliednd5e.dependentOn", this.id));
     await this.parent.createEmbeddedDocuments("ActiveEffect", riderEffects, { keepId: true });
 
     // Create Items
@@ -25038,8 +25051,8 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
         (await Promise.all(profile.riders.item.map(uuid => fromUuid(uuid)))).filter(_ => _), {
           transformAll: item => {
             const itemData = item.clone({}, { keepId: true }).toObject();
-            foundry.utils.setProperty(itemData, "flags.dnd5e.dependentOn", this.uuid);
-            foundry.utils.setProperty(itemData, "flags.dnd5e.enchantment.origin", this.uuid);
+            foundry.utils.setProperty(itemData, "flags.charliednd5e.dependentOn", this.uuid);
+            foundry.utils.setProperty(itemData, "flags.charliednd5e.enchantment.origin", this.uuid);
             return itemData;
           }
         }
@@ -25107,7 +25120,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
   _onUpdate(data, options, userId) {
     super._onUpdate(data, options, userId);
     const originalLevel = foundry.utils.getProperty(options, "dnd5e.originalExhaustion");
-    const newLevel = foundry.utils.getProperty(data, "flags.dnd5e.exhaustionLevel");
+    const newLevel = foundry.utils.getProperty(data, "flags.charliednd5e.exhaustionLevel");
     const originalEncumbrance = foundry.utils.getProperty(options, "dnd5e.originalEncumbrance");
     const newEncumbrance = data.statuses?.[0];
     const name = this.name;
@@ -25189,7 +25202,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
         type: game.i18n.localize(`TYPES.Item.${item.type}`)
       })}</p><hr><p>@Embed[${item.uuid} inline]</p>`,
       duration: activity.duration.getEffectData(),
-      "flags.dnd5e": {
+      "flags.charliednd5e": {
         activity: {
           type: activity.type, id: activity.id, uuid: activity.uuid
         },
@@ -25202,7 +25215,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
       statuses: [statusEffect.id].concat(statusEffect.statuses ?? [])
     }, data, {inplace: false});
     delete effectData.id;
-    if ( item.type === "spell" ) effectData["flags.dnd5e.spellLevel"] = item.system.level;
+    if ( item.type === "spell" ) effectData["flags.charliednd5e.spellLevel"] = item.system.level;
 
     return effectData;
   }
@@ -25231,8 +25244,8 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
       label: game.i18n.localize("DND5E.CONDITIONS.RiderConditions.label"),
       hint: game.i18n.localize("DND5E.CONDITIONS.RiderConditions.hint")
     }, {
-      name: "flags.dnd5e.riders.statuses",
-      value: app.document.getFlag("dnd5e", "riders.statuses") ?? [],
+      name: "flags.charliednd5e.riders.statuses",
+      value: app.document.getFlag("charliednd5e", "riders.statuses") ?? [],
       options: CONFIG.statusEffects.map(se => ({ value: se.id, label: se.name })),
       disabled: !context.editable
     });
@@ -25339,7 +25352,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
       return;
     }
     const choices = effects.reduce((acc, effect) => {
-      const data = effect.getFlag("dnd5e", "item");
+      const data = effect.getFlag("charliednd5e", "item");
       acc[effect.id] = data?.name ?? actor.items.get(data?.id)?.name ?? game.i18n.localize("DND5E.ConcentratingItemless");
       return acc;
     }, {});
@@ -25377,7 +25390,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
       "Dependent documents are now tracked using the `dependentOn` flag on the document itself.",
       { since: "DnD5e 5.2", until: "DnD5e 6.0", once: true }
     );
-    return Promise.all(dependent.map(d => d.setFlag("dnd5e", "dependentOn", this.uuid))).then(() => this);
+    return Promise.all(dependent.map(d => d.setFlag("charliednd5e", "dependentOn", this.uuid))).then(() => this);
   }
 
   /* -------------------------------------------- */
@@ -25389,7 +25402,7 @@ class ActiveEffect5e extends DependentDocumentMixin(ActiveEffect) {
   getDependents() {
     const actor = this.parent instanceof Actor ? this.parent : this.parent?.parent;
     const item = this.parent instanceof Item ? this.parent : null;
-    return (this.getFlag("dnd5e", "dependents") || []).reduce((arr, { uuid }) => {
+    return (this.getFlag("charliednd5e", "dependents") || []).reduce((arr, { uuid }) => {
       let doc;
       // TODO: Remove this special casing once https://github.com/foundryvtt/foundryvtt/issues/11214 is resolved
       if ( this.parent.pack && uuid.includes(this.parent.uuid) ) {
@@ -26018,7 +26031,7 @@ class AttributesFields {
     const encumbrance = this.attributes.encumbrance ??= {};
     const baseUnits = CONFIG.DND5E.encumbrance.baseUnits[this.parent.type]
       ?? CONFIG.DND5E.encumbrance.baseUnits.default;
-    const unitSystem = game.settings.get("dnd5e", "metricWeightUnits") ? "metric" : "imperial";
+    const unitSystem = game.settings.get("charliednd5e", "metricWeightUnits") ? "metric" : "imperial";
     const { attributes } = this;
 
     // Get the total weight from items
@@ -26028,7 +26041,7 @@ class AttributesFields {
 
     // [Optional] add Currency Weight (for non-transformed actors)
     const currency = this.currency;
-    if ( game.settings.get("dnd5e", "currencyWeight") && currency ) {
+    if ( game.settings.get("charliednd5e", "currencyWeight") && currency ) {
       const numCoins = Object.values(currency).reduce((val, denom) => val + Math.max(denom, 0), 0);
       const currencyPerWeight = config.currencyPerWeight[unitSystem];
       weight += convertWeight(
@@ -26042,7 +26055,7 @@ class AttributesFields {
     const keys = Object.keys(CONFIG.DND5E.actorSizes);
     const index = keys.findIndex(k => k === this.traits.size);
     const sizeConfig = CONFIG.DND5E.actorSizes[
-      keys[this.parent.flags.dnd5e?.powerfulBuild ? Math.min(index + 1, keys.length - 1) : index]
+      keys[this.parent.flags.charliednd5e?.powerfulBuild ? Math.min(index + 1, keys.length - 1) : index]
     ];
     const sizeMod = sizeConfig?.capacityMultiplier ?? sizeConfig?.token ?? 1;
     let maximumMultiplier;
@@ -26091,7 +26104,7 @@ class AttributesFields {
    */
   static prepareExhaustionLevel() {
     const exhaustion = this.parent.effects.get(ActiveEffect5e.ID.EXHAUSTION);
-    const level = exhaustion?.getFlag("dnd5e", "exhaustionLevel");
+    const level = exhaustion?.getFlag("charliednd5e", "exhaustionLevel");
     this.attributes.exhaustion = Number.isFinite(level) ? level : 0;
   }
 
@@ -26127,7 +26140,7 @@ class AttributesFields {
    */
   static prepareInitiative(rollData) {
     const init = this.attributes.init ??= {};
-    const flags = this.parent.flags.dnd5e ?? {};
+    const flags = this.parent.flags.charliednd5e ?? {};
     const globalCheckBonus = simplifyBonus(this.bonuses?.abilities?.check, rollData);
 
     // Compute initiative modifier
@@ -26300,7 +26313,7 @@ class AttributesFields {
     if ( !Number.isInteger(changes.total) || (changes.total === 0) ) return;
 
     this.parent._displayTokenEffect(changes);
-    if ( !game.settings.get("dnd5e", "disableConcentration") && (userId === game.userId)
+    if ( !game.settings.get("charliednd5e", "disableConcentration") && (userId === game.userId)
       && (options.dnd5e?.concentrationCheck !== false)
       && (changes.total < 0) && ((changes.temp < 0) || (curr.value < curr.effectiveMax)) ) {
       this.parent.challengeConcentration({ dc: this.parent.getConcentrationDC(-changes.total) });
@@ -26545,7 +26558,7 @@ class CommonTemplate extends ActorDataModel$1.mixin(CurrencyTemplate) {
    * @param {object} [options.originalSaves]       Original ability data for transformed actors.
    */
   prepareAbilities({ rollData={}, originalSaves }={}) {
-    const flags = this.parent.flags.dnd5e ?? {};
+    const flags = this.parent.flags.charliednd5e ?? {};
     const { prof = 0, ac } = this.attributes ?? {};
     Object.values(this.abilities).forEach(a => a.mod = Math.floor((a.value - 10) / 2));
     const checkBonus = simplifyBonus(this.bonuses?.abilities?.check, rollData);
@@ -26605,12 +26618,12 @@ class CommonTemplate extends ActorDataModel$1.mixin(CurrencyTemplate) {
    */
   calculateAbilityCheckProficiency(multiplier, ability, options={}) {
     let roundDown = true;
-    if ( (multiplier < 1) && ((game.settings.get("dnd5e", "rulesVersion") === "legacy") || options.skill) ) {
+    if ( (multiplier < 1) && ((game.settings.get("charliednd5e", "rulesVersion") === "legacy") || options.skill) ) {
       if ( this.parent._isRemarkableAthlete(ability) ) {
         multiplier = .5;
         roundDown = false;
       }
-      else if ( this.parent.flags.dnd5e?.jackOfAllTrades ) multiplier = .5;
+      else if ( this.parent.flags.charliednd5e?.jackOfAllTrades ) multiplier = .5;
     }
     return new Proficiency(this.attributes.prof, multiplier, roundDown);
   }
@@ -26627,7 +26640,7 @@ class CommonTemplate extends ActorDataModel$1.mixin(CurrencyTemplate) {
    * @returns {Proficiency}
    */
   calculateToolProficiency(multiplier, ability, options={}) {
-    if ( (multiplier === 1) && this.parent.flags.dnd5e?.toolExpertise ) {
+    if ( (multiplier === 1) && this.parent.flags.charliednd5e?.toolExpertise ) {
       return new Proficiency(this.attributes.prof, 2, true);
     }
     return this.calculateAbilityCheckProficiency(multiplier, ability, options);
@@ -27249,7 +27262,7 @@ class VehicleData extends CommonTemplate {
     const encumbrance = foundry.utils.deepClone(this.attributes.encumbrance);
     if ( Number.isFinite(encumbrance.max) || !this.draft?.value.length ) return encumbrance; // Encumbrance already calculated.
     const { baseUnits, draftMultiplier } = CONFIG.DND5E.encumbrance;
-    const unitSystem = game.settings.get("dnd5e", "metricWeightUnits") ? "metric" : "imperial";
+    const unitSystem = game.settings.get("charliednd5e", "metricWeightUnits") ? "metric" : "imperial";
     const units = baseUnits.default[unitSystem];
     encumbrance.max = (await Promise.all(this.draft.value.map(fromUuid))).reduce((n, actor) => {
       const capacity = actor.system.attributes?.encumbrance?.max || 0;
@@ -28360,7 +28373,7 @@ class BaseAttackActivityData extends BaseActivityData {
       }
     }
 
-    const criticalBonusDice = this.actor?.getFlag("dnd5e", "meleeCriticalDamageDice") ?? 0;
+    const criticalBonusDice = this.actor?.getFlag("charliednd5e", "meleeCriticalDamageDice") ?? 0;
     if ( (this.getActionType(rollConfig.attackMode) === "mwak") && (parseInt(criticalBonusDice) !== 0) ) {
       foundry.utils.setProperty(roll, "options.critical.bonusDice", criticalBonusDice);
     }
@@ -28433,7 +28446,7 @@ class AttackActivity extends ActivityMixin(BaseAttackActivityData) {
 
   /** @override */
   async _triggerSubsequentActions(config, results) {
-    this.rollAttack({ event: config.event }, {}, { data: { "flags.dnd5e.originatingMessage": results.message?.id } });
+    this.rollAttack({ event: config.event }, {}, { data: { "flags.charliednd5e.originatingMessage": results.message?.id } });
   }
 
   /* -------------------------------------------- */
@@ -28457,12 +28470,12 @@ class AttackActivity extends ActivityMixin(BaseAttackActivityData) {
     const buildConfig = this._buildAttackConfig.bind(this);
 
     const rollConfig = foundry.utils.mergeObject({
-      ammunition: this.item.getFlag("dnd5e", `last.${this.id}.ammunition`),
-      attackMode: this.item.getFlag("dnd5e", `last.${this.id}.attackMode`),
-      elvenAccuracy: this.actor?.getFlag("dnd5e", "elvenAccuracy")
+      ammunition: this.item.getFlag("charliednd5e", `last.${this.id}.ammunition`),
+      attackMode: this.item.getFlag("charliednd5e", `last.${this.id}.attackMode`),
+      elvenAccuracy: this.actor?.getFlag("charliednd5e", "elvenAccuracy")
         && CONFIG.DND5E.characterFlags.elvenAccuracy.abilities.includes(this.ability),
-      halflingLucky: this.actor?.getFlag("dnd5e", "halflingLucky"),
-      mastery: this.item.getFlag("dnd5e", `last.${this.id}.mastery`),
+      halflingLucky: this.actor?.getFlag("charliednd5e", "halflingLucky"),
+      mastery: this.item.getFlag("charliednd5e", `last.${this.id}.mastery`),
       target: targets.length === 1 ? targets[0].ac : undefined
     }, config);
 
@@ -28516,7 +28529,7 @@ class AttackActivity extends ActivityMixin(BaseAttackActivityData) {
       data: {
         flavor: `${this.item.name} - ${game.i18n.localize("DND5E.AttackRoll")}`,
         flags: {
-          dnd5e: {
+          charliednd5e: {
             ...this.messageFlags,
             messageType: "roll",
             roll: { type: "attack" }
@@ -28531,7 +28544,7 @@ class AttackActivity extends ActivityMixin(BaseAttackActivityData) {
     if ( !rolls.length ) return null;
     for ( const key of ["ammunition", "attackMode", "mastery"] ) {
       if ( !rolls[0].options[key] ) continue;
-      foundry.utils.setProperty(messageConfig.data, `flags.dnd5e.roll.${key}`, rolls[0].options[key]);
+      foundry.utils.setProperty(messageConfig.data, `flags.charliednd5e.roll.${key}`, rolls[0].options[key]);
     }
     await CONFIG.Dice.D20Roll.buildPost(rolls, rollConfig, messageConfig);
 
@@ -28557,7 +28570,7 @@ class AttackActivity extends ActivityMixin(BaseAttackActivityData) {
     else if ( rollConfig.attackMode ) rolls[0].options.attackMode = rollConfig.attackMode;
     if ( rolls[0].options.mastery ) flags.mastery = rolls[0].options.mastery;
     if ( canUpdate && !foundry.utils.isEmpty(flags) && (this.actor && this.actor.items.has(this.item.id)) ) {
-      await this.item.setFlag("dnd5e", `last.${this.id}`, flags);
+      await this.item.setFlag("charliednd5e", `last.${this.id}`, flags);
     }
 
     /**
@@ -28576,10 +28589,10 @@ class AttackActivity extends ActivityMixin(BaseAttackActivityData) {
     if ( canUpdate && ammoUpdate?.destroy ) {
       // If ammunition was deleted, store a copy of it in the roll message
       const data = this.actor.items.get(ammoUpdate.id).toObject();
-      const messageId = messageConfig.data?.flags?.dnd5e?.originatingMessage
+      const messageId = messageConfig.data?.flags?.charliednd5e?.originatingMessage
         ?? rollConfig.event?.target.closest("[data-message-id]")?.dataset.messageId;
       const attackMessage = dnd5e.registry.messages.get(messageId, "attack")?.pop();
-      await attackMessage?.setFlag("dnd5e", "roll.ammunitionData", data);
+      await attackMessage?.setFlag("charliednd5e", "roll.ammunitionData", data);
       await this.actor.deleteEmbeddedDocuments("Item", [ammoUpdate.id]);
     }
     else if ( canUpdate && ammoUpdate ) await this.actor?.updateEmbeddedDocuments("Item", [
@@ -28651,16 +28664,16 @@ class AttackActivity extends ActivityMixin(BaseAttackActivityData) {
    */
   static #rollDamage(event, target, message) {
     const lastAttack = message.getAssociatedRolls("attack").pop();
-    const attackMode = lastAttack?.getFlag("dnd5e", "roll.attackMode");
+    const attackMode = lastAttack?.getFlag("charliednd5e", "roll.attackMode");
 
     // Fetch the ammunition used with the last attack roll
     let ammunition;
     const actor = lastAttack?.getAssociatedActor();
     if ( actor ) {
-      const storedData = lastAttack.getFlag("dnd5e", "roll.ammunitionData");
+      const storedData = lastAttack.getFlag("charliednd5e", "roll.ammunitionData");
       ammunition = storedData
         ? new Item.implementation(storedData, { parent: actor })
-        : actor.items.get(lastAttack.getFlag("dnd5e", "roll.ammunition"));
+        : actor.items.get(lastAttack.getFlag("charliednd5e", "roll.ammunition"));
     }
 
     const isCritical = lastAttack?.rolls[0]?.isCritical;
@@ -29103,7 +29116,7 @@ class DamageActivity extends ActivityMixin(BaseDamageActivityData) {
 
   /** @override */
   async _triggerSubsequentActions(config, results) {
-    this.rollDamage({ event: config.event }, {}, { data: { "flags.dnd5e.originatingMessage": results.message?.id } });
+    this.rollDamage({ event: config.event }, {}, { data: { "flags.charliednd5e.originatingMessage": results.message?.id } });
   }
 
   /* -------------------------------------------- */
@@ -29277,7 +29290,7 @@ class EnchantUsageDialog extends ActivityUsageDialog {
 
     const enchantments = this.activity.availableEnchantments;
     if ( (enchantments.length > 1) && this._shouldDisplay("create.enchantment") ) {
-      const existingProfile = this.activity.existingEnchantment?.flags.dnd5e?.enchantmentProfile;
+      const existingProfile = this.activity.existingEnchantment?.flags.charliednd5e?.enchantmentProfile;
       context.hasCreation = true;
       context.enchantment = {
         field: new StringField$N({ required: true, blank: false, label: game.i18n.localize("DND5E.ENCHANTMENT.Label") }),
@@ -29406,9 +29419,9 @@ class BaseEnchantActivityData extends BaseActivityData {
   static transformEffectsData(source, options) {
     const effects = [];
     for ( const effect of source.effects ) {
-      if ( (effect.type !== "enchantment") && (effect.flags?.dnd5e?.type !== "enchantment") ) continue;
-      effects.push({ _id: effect._id, ...(effect.flags?.dnd5e?.enchantment ?? {}) });
-      delete effect.flags?.dnd5e?.enchantment;
+      if ( (effect.type !== "enchantment") && (effect.flags?.charliednd5e?.type !== "enchantment") ) continue;
+      effects.push({ _id: effect._id, ...(effect.flags?.charliednd5e?.enchantment ?? {}) });
+      delete effect.flags?.charliednd5e?.enchantment;
     }
     return effects;
   }
@@ -29486,7 +29499,7 @@ class EnchantActivity extends ActivityMixin(BaseEnchantActivityData) {
   /** @inheritDoc */
   _prepareUsageConfig(config) {
     config = super._prepareUsageConfig(config);
-    const existingProfile = this.existingEnchantment?.flags.dnd5e?.enchantmentProfile;
+    const existingProfile = this.existingEnchantment?.flags.charliednd5e?.enchantmentProfile;
     config.enchantmentProfile ??= this.item.effects.has(existingProfile) ? existingProfile
       : this.availableEnchantments[0]?._id;
     return config;
@@ -29507,11 +29520,11 @@ class EnchantActivity extends ActivityMixin(BaseEnchantActivityData) {
 
     // Store selected enchantment profile in message flag
     if ( usageConfig.enchantmentProfile ) foundry.utils.setProperty(
-      messageConfig, "data.flags.dnd5e.use.enchantmentProfile", usageConfig.enchantmentProfile
+      messageConfig, "data.flags.charliednd5e.use.enchantmentProfile", usageConfig.enchantmentProfile
     );
 
     // Don't display message if just auto-disabling existing enchantment
-    if ( this.existingEnchantment?.flags.dnd5e?.enchantmentProfile === usageConfig.enchantmentProfile ) {
+    if ( this.existingEnchantment?.flags.charliednd5e?.enchantmentProfile === usageConfig.enchantmentProfile ) {
       messageConfig.create = false;
     }
   }
@@ -29520,7 +29533,7 @@ class EnchantActivity extends ActivityMixin(BaseEnchantActivityData) {
 
   /** @override */
   onRenderChatCard(message, element) {
-    const enchantmentProfile = message.getFlag("dnd5e", "use.enchantmentProfile");
+    const enchantmentProfile = message.getFlag("charliednd5e", "use.enchantmentProfile");
     if ( !enchantmentProfile || !message.isContentVisible ) return;
 
     // Ensure concentration is still being maintained
@@ -29546,7 +29559,7 @@ class EnchantActivity extends ActivityMixin(BaseEnchantActivityData) {
     if ( existingEnchantment ) await existingEnchantment?.delete({ chatMessageOrigin: results.message?.id });
 
     // If no existing enchantment, or existing enchantment profile doesn't match provided one, create new enchantment
-    if ( !existingEnchantment || (existingEnchantment.flags.dnd5e?.enchantmentProfile !== config.enchantmentProfile) ) {
+    if ( !existingEnchantment || (existingEnchantment.flags.charliednd5e?.enchantmentProfile !== config.enchantmentProfile) ) {
       const concentration = results.effects.find(e => e.statuses.has(CONFIG.specialStatusEffects.CONCENTRATING));
       this.applyEnchantment(config.enchantmentProfile, this.item, {
         chatMessage: results.message, concentration, strict: false
@@ -29593,7 +29606,7 @@ class EnchantActivity extends ActivityMixin(BaseEnchantActivityData) {
 
     const flags = { enchantmentProfile: profile };
     if ( concentration ) flags.dependentOn = concentration.uuid;
-    const enchantmentData = effect.clone({ origin: this.uuid, "flags.dnd5e": flags }).toObject();
+    const enchantmentData = effect.clone({ origin: this.uuid, "flags.charliednd5e": flags }).toObject();
 
     /**
      * Hook that fires before an enchantment is applied to an item.
@@ -29616,7 +29629,7 @@ class EnchantActivity extends ActivityMixin(BaseEnchantActivityData) {
       }
       enchantmentData._id = foundry.utils.randomID();
       const toCreate = await Item5e.createWithContents([item], {
-        transformAll: item => item.clone({ "flags.dnd5e.dependentOn": `.ActiveEffect.${enchantmentData._id}` })
+        transformAll: item => item.clone({ "flags.charliednd5e.dependentOn": `.ActiveEffect.${enchantmentData._id}` })
       });
       [item] = await Item5e.createDocuments(toCreate, { keepId: true, parent: actor });
     }
@@ -30050,7 +30063,7 @@ class HealActivity extends ActivityMixin(BaseHealActivityData) {
 
   /** @override */
   async _triggerSubsequentActions(config, results) {
-    this.rollDamage({ event: config.event }, {}, { data: { "flags.dnd5e.originatingMessage": results.message?.id } });
+    this.rollDamage({ event: config.event }, {}, { data: { "flags.charliednd5e.originatingMessage": results.message?.id } });
   }
 
   /* -------------------------------------------- */
@@ -30060,7 +30073,7 @@ class HealActivity extends ActivityMixin(BaseHealActivityData) {
   /** @inheritDoc */
   async rollDamage(config={}, dialog={}, message={}) {
     const messageConfig = foundry.utils.mergeObject({
-      ["data.flags.dnd5e.roll.type"]: "healing"
+      ["data.flags.charliednd5e.roll.type"]: "healing"
     }, message);
     return super.rollDamage(config, dialog, messageConfig);
   }
@@ -30171,7 +30184,7 @@ class OrderUsageDialog extends ActivityUsageDialog {
    * @protected
    */
   _prepareCostsContext(context, { days, gold }) {
-    const { duration } = game.settings.get("dnd5e", "bastionConfiguration");
+    const { duration } = game.settings.get("charliednd5e", "bastionConfiguration");
     context.costs = {
       days: {
         field: new NumberField$q({ nullable: true, integer: true, min: 0, label: "DND5E.TimeDay" }),
@@ -30292,7 +30305,7 @@ class OrderUsageDialog extends ActivityUsageDialog {
       return;
     }
 
-    let { duration } = game.settings.get("dnd5e", "bastionConfiguration");
+    let { duration } = game.settings.get("charliednd5e", "bastionConfiguration");
     if ( (this.activity.order === "craft") || (this.activity.order === "harvest") ) {
       await this._prepareCraftContext(context, options);
     }
@@ -31028,7 +31041,7 @@ class OrderActivity extends ActivityMixin(BaseOrderActivityData) {
   _prepareUsageScaling(usageConfig, messageConfig, item) {
     // FIXME: No scaling happening here, but this is the only context we have both usageConfig and messageConfig.
     const { costs, craft, trade } = usageConfig;
-    messageConfig.data.flags.dnd5e.order = { costs, craft, trade };
+    messageConfig.data.flags.charliednd5e.order = { costs, craft, trade };
   }
 
   /* -------------------------------------------- */
@@ -31042,7 +31055,7 @@ class OrderActivity extends ActivityMixin(BaseOrderActivityData) {
 
   /** @override */
   _usageChatButtons(message) {
-    const { costs } = message.data.flags.dnd5e.order;
+    const { costs } = message.data.flags.charliednd5e.order;
     if ( !costs.gold || costs.paid ) return [];
     return [{
       label: game.i18n.localize("DND5E.FACILITY.Costs.Automatic"),
@@ -31059,7 +31072,7 @@ class OrderActivity extends ActivityMixin(BaseOrderActivityData) {
 
   /** @override */
   async _usageChatContext(message) {
-    const { costs, craft, trade } = message.data.flags.dnd5e.order;
+    const { costs, craft, trade } = message.data.flags.charliednd5e.order;
     const { type } = this.item.system;
     const supplements = [];
     if ( costs.days ) supplements.push(`
@@ -31125,8 +31138,8 @@ class OrderActivity extends ActivityMixin(BaseOrderActivityData) {
    */
   static async #onPayOrder(event, target, message) {
     const { method } = target.dataset;
-    const order = message.getFlag("dnd5e", "order");
-    const config = foundry.utils.expandObject({ "data.flags.dnd5e.order": order });
+    const order = message.getFlag("charliednd5e", "order");
+    const config = foundry.utils.expandObject({ "data.flags.charliednd5e.order": order });
     if ( method === "automatic" ) {
       try {
         await CurrencyManager.deductActorCurrency(this.actor, order.costs.gold, CONFIG.DND5E.defaultCurrency, {
@@ -31138,7 +31151,7 @@ class OrderActivity extends ActivityMixin(BaseOrderActivityData) {
         return;
       }
     }
-    foundry.utils.setProperty(config, "data.flags.dnd5e.order.costs.paid", true);
+    foundry.utils.setProperty(config, "data.flags.charliednd5e.order.costs.paid", true);
     const context = await this._usageChatContext(config);
     const content = await foundry.applications.handlebars.renderTemplate(this.metadata.usage.chatCard, context);
     await message.update({ content, flags: config.data.flags });
@@ -31423,7 +31436,7 @@ class SaveActivity extends ActivityMixin(BaseSaveActivityData) {
   /** @inheritDoc */
   async rollDamage(config={}, dialog={}, message={}) {
     message = foundry.utils.mergeObject({
-      "data.flags.dnd5e.roll": {
+      "data.flags.charliednd5e.roll": {
         damageOnSave: this.damage.onSave
       }
     }, message);
@@ -32330,8 +32343,8 @@ class CompendiumBrowserSettingsConfig extends Application5e {
         const { packageName, flags } = metadata;
         let tag = "";
         // Special case handling for D&D SRD.
-        if ( packageName === "dnd5e" ) {
-          tag = flags?.dnd5e?.sourceBook?.replace("SRD ", "");
+        if ( packageName === "charliednd5e" ) {
+          tag = flags?.charliednd5e?.sourceBook?.replace("SRD ", "");
         }
         return {
           tag, title,
@@ -32452,8 +32465,8 @@ class CompendiumBrowserSettingsConfig extends Application5e {
       case "package": packs = this._onTogglePackage(target); break;
       default: return;
     }
-    const setting = { ...game.settings.get("dnd5e", "packSourceConfiguration"), ...packs };
-    await game.settings.set("dnd5e", "packSourceConfiguration", setting);
+    const setting = { ...game.settings.get("charliednd5e", "packSourceConfiguration"), ...packs };
+    await game.settings.set("charliednd5e", "packSourceConfiguration", setting);
     this.render();
   }
 
@@ -32496,7 +32509,7 @@ class CompendiumBrowserSettingsConfig extends Application5e {
    */
   static collateSources() {
     const sources = new Set();
-    const setting = game.settings.get("dnd5e", "packSourceConfiguration");
+    const setting = game.settings.get("charliednd5e", "packSourceConfiguration");
     for ( const { collection, documentName } of game.packs ) {
       if ( (documentName !== "Actor") && (documentName !== "Item") ) continue;
       if ( setting[collection] !== false ) sources.add(collection);
@@ -33609,7 +33622,7 @@ class CompendiumBrowser extends Application5e {
         && sources.has(p.collection)
 
         // If types are set and specified in compendium flag, only include those that include the correct types
-        && (!types.size || !p.metadata.flags.dnd5e?.types || new Set(p.metadata.flags.dnd5e.types).intersects(types)))
+        && (!types.size || !p.metadata.flags.charliednd5e?.types || new Set(p.metadata.flags.charliednd5e.types).intersects(types)))
 
       // Generate an index based on the needed fields
       .map(async p => await Promise.all((await p.getIndex({ fields: Array.from(indexFields) })
@@ -33627,7 +33640,7 @@ class CompendiumBrowser extends Application5e {
         // Remove any documents that don't match the specified types or the provided filters
         .filter(i =>
           (!types.size || (types.has(i.type)
-            && (!p.metadata.flags.dnd5e?.types || p.metadata.flags.dnd5e.types.includes(i.type))))
+            && (!p.metadata.flags.charliednd5e?.types || p.metadata.flags.charliednd5e.types.includes(i.type))))
             && (!filters.length || performCheck(i, filters))
         )
 
@@ -34184,7 +34197,7 @@ class BaseSummonActivityData extends BaseActivityData {
   get summonedCreatures() {
     if ( !this.actor ) return [];
     return dnd5e.registry.summons.creatures(this.actor)
-      .filter(i => i?.getFlag("dnd5e", "summon.origin") === this.uuid);
+      .filter(i => i?.getFlag("charliednd5e", "summon.origin") === this.uuid);
   }
 
   /* -------------------------------------------- */
@@ -34281,7 +34294,7 @@ class SummonActivity extends ActivityMixin(BaseSummonActivityData) {
    * @type {boolean}
    */
   get canSummon() {
-    return game.user.can("TOKEN_CREATE") && (game.user.isGM || game.settings.get("dnd5e", "allowSummoning"));
+    return game.user.can("TOKEN_CREATE") && (game.user.isGM || game.settings.get("charliednd5e", "allowSummoning"));
   }
 
   /* -------------------------------------------- */
@@ -34380,7 +34393,7 @@ class SummonActivity extends ActivityMixin(BaseSummonActivityData) {
     const summonUuid = this.summon.mode === "cr" ? await this.queryActor(profile) : profile.uuid;
     if ( !summonUuid ) return;
     const actor = await dnd5e.documents.Actor5e.fetchExisting(summonUuid, {
-      origin: { key: "flags.dnd5e.summon.origin", value: this.item?.uuid }
+      origin: { key: "flags.charliednd5e.summon.origin", value: this.item?.uuid }
     });
 
     // Verify ownership of actor
@@ -34495,7 +34508,7 @@ class SummonActivity extends ActivityMixin(BaseSummonActivityData) {
     const prof = rollData.attributes?.prof ?? 0;
 
     // Add flags
-    actorUpdates["flags.dnd5e.summon"] = {
+    actorUpdates["flags.charliednd5e.summon"] = {
       level: this.relevantLevel,
       mod: rollData.mod,
       origin: this.item.uuid,
@@ -35448,7 +35461,7 @@ class TransformActivity extends ActivityMixin(BaseTransformActivityData) {
    * @type {boolean}
    */
   get canTransform() {
-    return game.user.can("ACTOR_CREATE") && (game.user.isGM || game.settings.get("dnd5e", "allowPolymorphing"));
+    return game.user.can("ACTOR_CREATE") && (game.user.isGM || game.settings.get("charliednd5e", "allowPolymorphing"));
   }
 
   /* -------------------------------------------- */
@@ -35476,7 +35489,7 @@ class TransformActivity extends ActivityMixin(BaseTransformActivityData) {
   async _finalizeMessageConfig(usageConfig, messageConfig, results) {
     await super._finalizeMessageConfig(usageConfig, messageConfig, results);
     if ( usageConfig.transform?.profile ) {
-      foundry.utils.setProperty(messageConfig.data, "flags.dnd5e.transform.profile", usageConfig.transform.profile);
+      foundry.utils.setProperty(messageConfig.data, "flags.charliednd5e.transform.profile", usageConfig.transform.profile);
     }
   }
 
@@ -35510,8 +35523,8 @@ class TransformActivity extends ActivityMixin(BaseTransformActivityData) {
     if ( profile ) {
       const uuid = !this.transform.mode ? profile.uuid : await this.queryActor(profile);
       if ( uuid ) {
-        if ( results.message instanceof ChatMessage ) results.message.setFlag("dnd5e", "transform.uuid", uuid);
-        else foundry.utils.setProperty(results.message, "flags.dnd5e.transform.uuid", uuid);
+        if ( results.message instanceof ChatMessage ) results.message.setFlag("charliednd5e", "transform.uuid", uuid);
+        else foundry.utils.setProperty(results.message, "flags.charliednd5e.transform.uuid", uuid);
       }
     }
     await super._finalizeUsage(config, results);
@@ -35558,9 +35571,9 @@ class TransformActivity extends ActivityMixin(BaseTransformActivityData) {
       return;
     }
 
-    const profileId = message.getFlag("dnd5e", "transform.profile");
+    const profileId = message.getFlag("charliednd5e", "transform.profile");
     const profile = this.profiles.find(p => p._id === profileId) || this.profiles[0];
-    const uuid = message.getFlag("dnd5e", "transform.uuid") ?? await this.queryActor(profile);
+    const uuid = message.getFlag("charliednd5e", "transform.uuid") ?? await this.queryActor(profile);
     const source = await fromUuid(uuid);
     if ( !source ) {
       ui.notifications.warn("DND5E.TRANSFORM.Warning.SourceActor", { localize: true });
@@ -35744,7 +35757,7 @@ class UtilityActivity extends ActivityMixin(BaseUtilityActivityData) {
       data: {
         flavor: `${this.item.name} - ${this.roll.label || game.i18n.localize("DND5E.OtherFormula")}`,
         flags: {
-          dnd5e: {
+          charliednd5e: {
             ...this.messageFlags,
             messageType: "roll",
             roll: { type: "generic" }
@@ -36136,7 +36149,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
    * @type {boolean}
    */
   get isPolymorphed() {
-    return this.getFlag("dnd5e", "isPolymorphed") || false;
+    return this.getFlag("charliednd5e", "isPolymorphed") || false;
   }
 
   /* -------------------------------------------- */
@@ -36176,7 +36189,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
 
     for ( const effect of this.effects ) {
       if ( !effect.statuses.has(CONFIG.specialStatusEffects.CONCENTRATING) ) continue;
-      const data = effect.getFlag("dnd5e", "item");
+      const data = effect.getFlag("charliednd5e", "item");
       concentration.effects.add(effect);
       if ( data ) {
         let item = this.items.get(data.id);
@@ -36220,7 +36233,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     // Migrate encounter groups to their own Actor type.
     if ( (source.type === "group") && (source.system?.type?.value === "encounter") ) {
       source.type = "encounter";
-      foundry.utils.setProperty(source, "flags.dnd5e.persistSourceMigration", true);
+      foundry.utils.setProperty(source, "flags.charliednd5e.persistSourceMigration", true);
     }
 
     source = super._initializeSource(source, options);
@@ -36346,7 +36359,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
   *allApplicableEffects() {
     for ( const effect of super.allApplicableEffects() ) {
       if ( effect.type === "enchantment" ) continue;
-      if ( effect.parent?.getFlag("dnd5e", "riders.effect")?.includes(effect.id) ) continue;
+      if ( effect.parent?.getFlag("charliednd5e", "riders.effect")?.includes(effect.id) ) continue;
       yield effect;
     }
   }
@@ -36379,7 +36392,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     const localActor = game.actors.find(a => {
       const matchesOrigin = !origin || (foundry.utils.getProperty(a, origin.key) === origin.value);
       // Has been auto-imported by this process.
-      return (a.getFlag("dnd5e", "isAutoImported") || a.getFlag("dnd5e", "summonedCopy")) // Back-compat
+      return (a.getFlag("charliednd5e", "isAutoImported") || a.getFlag("charliednd5e", "summonedCopy")) // Back-compat
       // User has ownership of existing actor
       && a.isOwner
       // Sourced from the desired actor UUID.
@@ -36396,12 +36409,12 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     if ( actor.pack ) {
       // Template actor resides only in a compendium, import the actor into the world.
       return game.actors.importFromCompendium(game.packs.get(actor.pack), actor.id, {
-        "flags.dnd5e.isAutoImported": true
+        "flags.charliednd5e.isAutoImported": true
       });
     } else {
       // A linked world actor was found. Create a copy to avoid affecting the original.
       return actor.clone({
-        "flags.dnd5e.isAutoImported": true,
+        "flags.charliednd5e.isAutoImported": true,
         "_stats.compendiumSource": actor._stats.compendiumSource,
         "_stats.duplicateSource": actor.uuid
       }, { save: true });
@@ -36416,7 +36429,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
    */
   async getPreferredArtwork() {
     if ( !this._preferredArtwork ) {
-      const showTokenPortrait = this.getFlag("dnd5e", "showTokenPortrait") === true;
+      const showTokenPortrait = this.getFlag("charliednd5e", "showTokenPortrait") === true;
       const token = this.isToken ? this.token : this.prototypeToken;
       const defaultArtwork = Actor.implementation.getDefaultArtwork(this._source)?.img;
       let texture = token?.texture.src;
@@ -36439,7 +36452,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
 
   /** @inheritDoc */
   prepareDerivedData() {
-    const origin = this.getFlag("dnd5e", "summon.origin");
+    const origin = this.getFlag("charliednd5e", "summon.origin");
     if ( origin && this.token?.id ) {
       const { collection, primaryId } = foundry.utils.parseUuid(origin);
       dnd5e.registry.summons.track(collection?.get?.(primaryId)?.uuid, this.uuid);
@@ -36789,8 +36802,8 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     if ( Hooks.call("dnd5e.preCalculateDamage", this, damages, options) === false ) return false;
 
     const multiplier = options.multiplier ?? 1;
-    const treatAs = options.originatingMessage?.flags?.dnd5e?.roll?.type
-      ? options.originatingMessage.flags.dnd5e.roll.type === "healing" ? "healing" : "damage"
+    const treatAs = options.originatingMessage?.flags?.charliednd5e?.roll?.type
+      ? options.originatingMessage.flags.charliednd5e.roll.type === "healing" ? "healing" : "damage"
       : options.only ?? "damage";
 
     const skipped = type => {
@@ -37062,7 +37075,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     else if ( target instanceof ActiveEffect5e ) effect = effects.has(target) ? target : null;
     else if ( target instanceof Item5e ) {
       effect = effects.find(e => {
-        const data = e.getFlag("dnd5e", "item") ?? {};
+        const data = e.getFlag("charliednd5e", "item") ?? {};
         return (data.id === target._id) || (data.data?._id === target._id);
       });
     }
@@ -37142,7 +37155,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
    * @private
    */
   _isRemarkableAthlete(ability) {
-    return (dnd5e.settings.rulesVersion === "legacy") && this.getFlag("dnd5e", "remarkableAthlete")
+    return (dnd5e.settings.rulesVersion === "legacy") && this.getFlag("charliednd5e", "remarkableAthlete")
       && CONFIG.DND5E.characterFlags.remarkableAthlete.abilities.includes(ability);
   }
 
@@ -37177,7 +37190,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
    */
   static async handleSkillCheckRequest(actor, request, config, { event }={}) {
     const data = {};
-    foundry.utils.setProperty(data, "flags.dnd5e.requestResult", { actorUuid: actor.uuid, requestId: request.id });
+    foundry.utils.setProperty(data, "flags.charliednd5e.requestResult", { actorUuid: actor.uuid, requestId: request.id });
     const [roll] = (await actor.rollSkill({ ...config, event }, {}, { data })) ?? [];
     return roll?.parent ?? null;
   }
@@ -37255,8 +37268,8 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     const alternate = type === "skill" ? this.system.tools?.[config.tool] : this.system.skills?.[config.skill];
     const abilityId = config.ability ?? relevant?.ability ?? (type === "skill" ? skillConfig.ability : toolConfig.ability);
     const ability = this.system.abilities?.[abilityId];
-    const hostActor = this.isPolymorphed && this.flags?.dnd5e?.transformOptions?.mergeSkills && (type === "skill")
-      ? game.actors.get(this.flags.dnd5e?.originalActor) : null;
+    const hostActor = this.isPolymorphed && this.flags?.charliednd5e?.transformOptions?.mergeSkills && (type === "skill")
+      ? game.actors.get(this.flags.charliednd5e?.originalActor) : null;
     const buildConfig = this._buildSkillToolConfig.bind(this, type, hostActor);
     const doubleProf = !!relevant?.prof.hasProficiency && !!alternate?.prof.hasProficiency;
     const pace = TravelField.getTravelPaceMode(config.pace, config.skill);
@@ -37272,8 +37285,8 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     const rollConfig = foundry.utils.mergeObject({
       advantage, disadvantage,
       ability: relevant?.ability ?? (type === "skill" ? skillConfig.ability : toolConfig?.ability),
-      halflingLucky: this.getFlag("dnd5e", "halflingLucky"),
-      reliableTalent: (relevant?.value >= 1) && this.getFlag("dnd5e", "reliableTalent")
+      halflingLucky: this.getFlag("charliednd5e", "halflingLucky"),
+      reliableTalent: (relevant?.value >= 1) && this.getFlag("charliednd5e", "reliableTalent")
     }, config);
     rollConfig.hookNames = [...(config.hookNames ?? []), type, "abilityCheck", "d20Test"];
     rollConfig.rolls = [CONFIG.Dice.D20Roll.mergeConfigs({
@@ -37298,7 +37311,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
       create: true,
       data: {
         flags: {
-          dnd5e: {
+          charliednd5e: {
             messageType: "roll",
             roll: {
               [`${type}Id`]: config[type],
@@ -37483,7 +37496,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     };
 
     const rollConfig = foundry.utils.mergeObject({
-      halflingLucky: this.getFlag("dnd5e", "halflingLucky")
+      halflingLucky: this.getFlag("charliednd5e", "halflingLucky")
     }, config);
     rollConfig.hookNames = [...(config.hookNames ?? []), name, "d20Test"];
     rollConfig.rolls = [
@@ -37498,7 +37511,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
       create: true,
       data: {
         flags: {
-          dnd5e: {
+          charliednd5e: {
             messageType: "roll",
             roll: {
               ability: config.ability,
@@ -37566,7 +37579,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     };
 
     // Diamond Soul adds proficiency
-    if ( this.getFlag("dnd5e", "diamondSoul") ) {
+    if ( this.getFlag("charliednd5e", "diamondSoul") ) {
       parts.push("@prof");
       data.prof = new Proficiency(this.system.attributes.prof, 1).term;
     }
@@ -37585,7 +37598,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     const messageConfig = foundry.utils.mergeObject({
       data: {
         flags: {
-          dnd5e: {
+          charliednd5e: {
             roll: {
               type: "death"
             }
@@ -37778,7 +37791,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
    */
   getInitiativeRollConfig(options={}) {
     const init = this.system.attributes?.init;
-    const flags = this.flags.dnd5e ?? {};
+    const flags = this.flags.charliednd5e ?? {};
     const abilityId = init?.ability || CONFIG.DND5E.defaultAbilities.initiative;
     const ability = this.system.abilities?.[abilityId];
 
@@ -37801,11 +37814,11 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     this.addRollExhaustion(parts, data);
 
     // Ability score tiebreaker
-    const tiebreaker = game.settings.get("dnd5e", "initiativeDexTiebreaker");
+    const tiebreaker = game.settings.get("charliednd5e", "initiativeDexTiebreaker");
     if ( tiebreaker && Number.isNumeric(ability?.value) ) parts.push(String(ability.value / 100));
 
     // Fixed initiative score
-    const scoreMode = game.settings.get("dnd5e", "initiativeScore");
+    const scoreMode = game.settings.get("charliednd5e", "initiativeScore");
     const useScore = (scoreMode === "all") || ((scoreMode === "npcs") && game.user.isGM && this.system.isNPC);
 
     options = foundry.utils.mergeObject({
@@ -37969,7 +37982,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
         speaker: ChatMessage.implementation.getSpeaker({actor: this}),
         flavor,
         title: `${flavor}: ${this.name}`,
-        "flags.dnd5e.roll": {type: "hitDie"}
+        "flags.charliednd5e.roll": {type: "hitDie"}
       }
     }, message);
 
@@ -38044,7 +38057,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
       title: `${flavor}: ${this.name}`,
       flavor,
       speaker: ChatMessage.implementation.getSpeaker({ actor: this }),
-      "flags.dnd5e.roll": { type: "hitPoints" }
+      "flags.charliednd5e.roll": { type: "hitPoints" }
     };
 
     /**
@@ -38097,7 +38110,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
       title: `${flavor}: ${this.name}`,
       flavor,
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      "flags.dnd5e.roll": { type: "hitPoints" }
+      "flags.charliednd5e.roll": { type: "hitPoints" }
     };
 
     /**
@@ -38139,7 +38152,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
    */
   async initiateRest(config={}) {
     if ( this.system.isVehicle ) return;
-    if ( !game.user.isGM && !game.settings.get("dnd5e", "allowRests") && !config.request ) {
+    if ( !game.user.isGM && !game.settings.get("charliednd5e", "allowRests") && !config.request ) {
       ui.notifications.warn("DND5E.REST.Warning.OnlyByRequest", { localize: true, log: false });
       return;
     }
@@ -38148,7 +38161,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     const restConfig = CONFIG.DND5E.restTypes[config.type];
     config = foundry.utils.mergeObject({
       dialog: true, chat: restConfig.chat !== false,
-      duration: restConfig.duration[game.settings.get("dnd5e", "restVariant")],
+      duration: restConfig.duration[game.settings.get("charliednd5e", "restVariant")],
       newDay: restConfig.newDay === true,
       advanceBastionTurn: restConfig.advanceBastionTurn === true, advanceTime: restConfig.advanceTime === true,
       autoHD: restConfig.autoHD === true, autoHDThreshold: 3,
@@ -38316,7 +38329,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
      */
     Hooks.callAll("dnd5e.restCompleted", this, result, config);
 
-    if ( config.advanceBastionTurn && game.user.isGM && game.settings.get("dnd5e", "bastionConfiguration").enabled
+    if ( config.advanceBastionTurn && game.user.isGM && game.settings.get("charliednd5e", "bastionConfiguration").enabled
       && this.itemTypes.facility.length ) await dnd5e.bastion.advanceAllFacilities(this);
 
     // Return data summarizing the rest effects
@@ -38373,7 +38386,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
         type: result.type
       }
     };
-    if ( config.request ) foundry.utils.setProperty(chatData, "flags.dnd5e.requestResult", {
+    if ( config.request ) foundry.utils.setProperty(chatData, "flags.charliednd5e.requestResult", {
       actorUuid: this.uuid, requestId: config.request.id
     });
     ChatMessage.applyRollMode(chatData, CONFIG.Dice.BasicRoll.getMessageMode());
@@ -38731,8 +38744,8 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     let originalSaves = null;
     let originalSkills = null;
     if ( this.isPolymorphed ) {
-      const transformOptions = this.flags.dnd5e?.transformOptions;
-      const original = game.actors?.get(this.flags.dnd5e?.originalActor);
+      const transformOptions = this.flags.charliednd5e?.transformOptions;
+      const original = game.actors?.get(this.flags.charliednd5e?.originalActor);
       if ( original ) {
         if ( transformOptions.mergeSaves ) originalSaves = original.system.abilities;
         if ( transformOptions.mergeSkills ) originalSkills = original.system.skills;
@@ -38754,7 +38767,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
    */
   async transformInto(source, settings=new TransformationSetting(), options={}) {
     // Ensure the player is allowed to polymorph
-    const allowed = game.settings.get("dnd5e", "allowPolymorphing");
+    const allowed = game.settings.get("charliednd5e", "allowPolymorphing");
     if ( !allowed && !game.user.isGM ) {
       ui.notifications.warn("DND5E.TRANSFORM.Warning.NoPermission", { localize: true });
       return null;
@@ -38762,8 +38775,8 @@ class Actor5e extends SystemDocumentMixin(Actor) {
 
     // Get the original Actor data and the new source data
     const o = this.toObject();
-    o.flags.dnd5e = o.flags.dnd5e || {};
-    o.flags.dnd5e.transformOptions = {
+    o.flags.charliednd5e = o.flags.charliednd5e || {};
+    o.flags.charliednd5e.transformOptions = {
       ...settings.toObject(),
       mergeSaves: settings.merge.has("saves"),
       mergeSkills: settings.merge.has("skills")
@@ -39001,11 +39014,11 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     }
 
     // Set new data flags
-    if ( !this.isPolymorphed || !d.flags.dnd5e.originalActor ) d.flags.dnd5e.originalActor = this.id;
-    d.flags.dnd5e.isPolymorphed = true;
+    if ( !this.isPolymorphed || !d.flags.charliednd5e.originalActor ) d.flags.charliednd5e.originalActor = this.id;
+    d.flags.charliednd5e.isPolymorphed = true;
 
     // Gather previous actor data
-    const previousActorIds = this.getFlag("dnd5e", "previousActorIds") || [];
+    const previousActorIds = this.getFlag("charliednd5e", "previousActorIds") || [];
     previousActorIds.push(this._id);
     foundry.utils.setProperty(d.flags, "dnd5e.previousActorIds", previousActorIds);
 
@@ -39025,7 +39038,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
         tokenData.name = `${this.token.name} (${sourceData.name})`;
       }
 
-      if ( !this.token.flags.dnd5e?.previousActorData ) {
+      if ( !this.token.flags.charliednd5e?.previousActorData ) {
         const previousActorData = this.token.delta.toObject();
         const previousTokenData = { texture: {} };
         for ( const k of [...tokenPropsFromSource, ...tokenPropsFromSelf, "name"] ) {
@@ -39034,8 +39047,8 @@ class Actor5e extends SystemDocumentMixin(Actor) {
         for ( const k of tokenTexturePropsFromSource ) {
           previousTokenData.texture[k] = this.token.texture[k];
         }
-        foundry.utils.setProperty(tokenData, "flags.dnd5e.previousActorData", previousActorData);
-        foundry.utils.setProperty(tokenData, "flags.dnd5e.previousTokenData", previousTokenData);
+        foundry.utils.setProperty(tokenData, "flags.charliednd5e.previousActorData", previousActorData);
+        foundry.utils.setProperty(tokenData, "flags.charliednd5e.previousTokenData", previousTokenData);
       }
       await this.sheet?.close();
       const update = await this.token.update(tokenData);
@@ -39092,10 +39105,10 @@ class Actor5e extends SystemDocumentMixin(Actor) {
         newTokenData.name = `${t.document.name} (${sourceData.name})`;
       }
 
-      const dOriginalActor = foundry.utils.getProperty(d, "flags.dnd5e.originalActor");
-      foundry.utils.setProperty(newTokenData, "flags.dnd5e.originalActor", dOriginalActor);
-      foundry.utils.setProperty(newTokenData, "flags.dnd5e.isPolymorphed", true);
-      if ( !t.document.flags.dnd5e?.previousTokenData ) {
+      const dOriginalActor = foundry.utils.getProperty(d, "flags.charliednd5e.originalActor");
+      foundry.utils.setProperty(newTokenData, "flags.charliednd5e.originalActor", dOriginalActor);
+      foundry.utils.setProperty(newTokenData, "flags.charliednd5e.isPolymorphed", true);
+      if ( !t.document.flags.charliednd5e?.previousTokenData ) {
         const previousTokenData = { texture: {} };
         for ( const k of [...tokenPropsFromSource, ...tokenPropsFromSelf, "name"] ) {
           previousTokenData[k] = t.document[k];
@@ -39103,7 +39116,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
         for ( const k of tokenTexturePropsFromSource ) {
           previousTokenData.texture[k] = t.document.texture[k];
         }
-        foundry.utils.setProperty(newTokenData, "flags.dnd5e.previousTokenData", previousTokenData);
+        foundry.utils.setProperty(newTokenData, "flags.charliednd5e.previousTokenData", previousTokenData);
       }
       return newTokenData;
     });
@@ -39139,12 +39152,12 @@ class Actor5e extends SystemDocumentMixin(Actor) {
      */
     Hooks.callAll("dnd5e.revertOriginalForm", this, options);
 
-    const transformOptions = this.getFlag("dnd5e", "transformOptions");
-    const previousActorIds = this.getFlag("dnd5e", "previousActorIds") ?? [];
+    const transformOptions = this.getFlag("charliednd5e", "transformOptions");
+    const previousActorIds = this.getFlag("charliednd5e", "previousActorIds") ?? [];
     const isRendered = this.sheet.rendered;
 
     // Obtain a reference to the original actor
-    const original = game.actors.get(this.getFlag("dnd5e", "originalActor"));
+    const original = game.actors.get(this.getFlag("charliednd5e", "originalActor"));
 
     const update = {};
     if ( transformOptions?.keep?.includes("hp") ) {
@@ -39164,22 +39177,22 @@ class Actor5e extends SystemDocumentMixin(Actor) {
       const baseActor = original ? original : game.actors.get(this.token.actorId);
       if ( !baseActor ) {
         ui.notifications.warn(game.i18n.format("DND5E.TRANSFORM.Warning.OriginalActor", {
-          reference: this.getFlag("dnd5e", "originalActor")
+          reference: this.getFlag("charliednd5e", "originalActor")
         }));
         return;
       }
       const prototypeTokenData = (await baseActor.getTokenDocument()).toObject();
-      const actorData = this.token.getFlag("dnd5e", "previousActorData");
+      const actorData = this.token.getFlag("charliednd5e", "previousActorData");
       foundry.utils.mergeObject(actorData, update);
       const tokenUpdate = this.token.toObject();
       actorData._id = tokenUpdate.delta._id;
       tokenUpdate.delta = actorData;
 
-      foundry.utils.mergeObject(tokenUpdate, this.token.getFlag("dnd5e", "previousTokenData"));
+      foundry.utils.mergeObject(tokenUpdate, this.token.getFlag("charliednd5e", "previousTokenData"));
       tokenUpdate.sight = prototypeTokenData.sight;
       tokenUpdate.detectionModes = prototypeTokenData.detectionModes;
-      delete tokenUpdate.flags.dnd5e.previousActorData;
-      delete tokenUpdate.flags.dnd5e.previousTokenData;
+      delete tokenUpdate.flags.charliednd5e.previousActorData;
+      delete tokenUpdate.flags.charliednd5e.previousTokenData;
 
       await this.sheet.close();
       const token = await TokenDocument.implementation.create(tokenUpdate, { parent: this.token.parent, render: true });
@@ -39190,7 +39203,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
 
     if ( !original ) {
       ui.notifications.warn(game.i18n.format("DND5E.TRANSFORM.Warning.OriginalActor", {
-        reference: this.getFlag("dnd5e", "originalActor")
+        reference: this.getFlag("charliednd5e", "originalActor")
       }));
       return;
     }
@@ -39205,7 +39218,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
         update.elevation = t.document.elevation;
         update.hidden = t.document.hidden;
         update.rotation = t.document.rotation;
-        foundry.utils.mergeObject(update, t.document.getFlag("dnd5e", "previousTokenData"));
+        foundry.utils.mergeObject(update, t.document.getFlag("charliednd5e", "previousTokenData"));
         delete update.x;
         delete update.y;
         return update;
@@ -39223,7 +39236,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     } else {
       // Remove the flags
       const actorUpdates = polymorphedActorIds.filter(id => game.actors.get(id).isOwner).map(p => {
-        return { _id: p, "flags.dnd5e": { "-=isPolymorphed": null, "-=previousActorIds": null } };
+        return { _id: p, "flags.charliednd5e": { "-=isPolymorphed": null, "-=previousActorIds": null } };
       });
       await Actor.implementation.updateDocuments(actorUpdates);
 
@@ -39253,7 +39266,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
         return actor.revertOriginalForm();
       },
       condition: li => {
-        const allowed = game.settings.get("dnd5e", "allowPolymorphing");
+        const allowed = game.settings.get("charliednd5e", "allowPolymorphing");
         if ( !allowed && !game.user.isGM ) return false;
         const actor = game.actors.get(li.dataset.documentId ?? li.dataset.entryId);
         return actor && actor.isPolymorphed;
@@ -39263,7 +39276,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
       name: "DND5E.Group.Primary.Set",
       icon: '<i class="fa-solid fa-star"></i>',
       callback: li => {
-        game.settings.set("dnd5e", "primaryParty", { actor: game.actors.get(li.dataset.documentId ?? li.dataset.entryId) });
+        game.settings.set("charliednd5e", "primaryParty", { actor: game.actors.get(li.dataset.documentId ?? li.dataset.entryId) });
       },
       condition: li => {
         const actor = game.actors.get(li.dataset.documentId ?? li.dataset.entryId);
@@ -39275,7 +39288,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
       name: "DND5E.Group.Primary.Remove",
       icon: '<i class="fa-regular fa-star"></i>',
       callback: li => {
-        game.settings.set("dnd5e", "primaryParty", { actor: null });
+        game.settings.set("charliednd5e", "primaryParty", { actor: null });
       },
       condition: li => {
         const actor = game.actors.get(li.dataset.documentId ?? li.dataset.entryId);
@@ -39344,7 +39357,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
 
     super._onDelete(options, userId);
 
-    const origin = this.getFlag("dnd5e", "summon.origin");
+    const origin = this.getFlag("charliednd5e", "summon.origin");
     if ( origin ) {
       const { collection, primaryId } = foundry.utils.parseUuid(origin);
       dnd5e.registry.summons.untrack(collection?.get?.(primaryId)?.uuid, this.uuid);
@@ -39502,10 +39515,10 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     if ( level < 1 ) return effect?.delete();
     else if ( effect ) {
       const originalExhaustion = foundry.utils.getProperty(options, "dnd5e.originalExhaustion");
-      return effect.update({ "flags.dnd5e.exhaustionLevel": level }, { dnd5e: { originalExhaustion } });
+      return effect.update({ "flags.charliednd5e.exhaustionLevel": level }, { dnd5e: { originalExhaustion } });
     } else {
       effect = await ActiveEffect.implementation.fromStatusEffect("exhaustion", { parent: this });
-      effect.updateSource({ "flags.dnd5e.exhaustionLevel": level });
+      effect.updateSource({ "flags.charliednd5e.exhaustionLevel": level });
       return ActiveEffect.implementation.create(effect, { parent: this, keepId: true });
     }
   }
@@ -39519,7 +39532,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
    */
   updateBloodied(options) {
     const hp = this.system.attributes?.hp;
-    if ( !hp?.effectiveMax || (game.settings.get("dnd5e", "bloodied") === "none") ) return;
+    if ( !hp?.effectiveMax || (game.settings.get("charliednd5e", "bloodied") === "none") ) return;
 
     const effect = this.effects.get(ActiveEffect5e.ID.BLOODIED);
     if ( hp.value > hp.effectiveMax * CONFIG.DND5E.bloodied.threshold ) return effect?.delete();
@@ -39528,7 +39541,7 @@ class Actor5e extends SystemDocumentMixin(Actor) {
     return ActiveEffect.implementation.create({
       _id: ActiveEffect5e.ID.BLOODIED,
       img: CONFIG.DND5E.bloodied.img,
-      flags: { dnd5e: { isTemporary: true } },
+      flags: { charliednd5e: { isTemporary: true } },
       name: game.i18n.localize(CONFIG.DND5E.bloodied.name),
       statuses: ["bloodied"],
       showIcon: CONST.ACTIVE_EFFECT_SHOW_ICON?.CONDITIONAL
@@ -39544,9 +39557,9 @@ class Actor5e extends SystemDocumentMixin(Actor) {
    */
   updateEncumbrance(options) {
     const encumbrance = this.system.attributes?.encumbrance;
-    if ( !encumbrance || (game.settings.get("dnd5e", "encumbrance") === "none") ) return;
+    if ( !encumbrance || (game.settings.get("charliednd5e", "encumbrance") === "none") ) return;
     const statuses = [];
-    const variant = game.settings.get("dnd5e", "encumbrance") === "variant";
+    const variant = game.settings.get("charliednd5e", "encumbrance") === "variant";
     if ( encumbrance.value > encumbrance.thresholds.maximum ) statuses.push("exceedingCarryingCapacity");
     if ( (encumbrance.value > encumbrance.thresholds.heavilyEncumbered) && variant ) statuses.push("heavilyEncumbered");
     if ( (encumbrance.value > encumbrance.thresholds.encumbered) && variant ) statuses.push("encumbered");
@@ -40237,7 +40250,7 @@ class AbilityScoreImprovementAdvancement extends Advancement {
    * @type {boolean}
    */
   get allowFeat() {
-    return (this.item.type === "class") && (game.settings.get("dnd5e", "allowFeats")
+    return (this.item.type === "class") && (game.settings.get("charliednd5e", "allowFeats")
       || dnd5e.settings.rulesVersion === "modern");
   }
 
@@ -41132,7 +41145,7 @@ class ItemChoiceFlow extends ItemGrantFlow$1 {
       isCurrentLevel: true,
       items: [...this.pool, ...dropped].reduce((arr, item) => {
         const { id, name, img } = item;
-        const uuid = item.flags.dnd5e?.sourceId ?? item.uuid;
+        const uuid = item.flags.charliednd5e?.sourceId ?? item.uuid;
         const validFeature = !item.system.validatePrerequisites || (item.system.validatePrerequisites(
           this.advancement.actor, { added, removed, level: this.featureLevel }
         ) === true);
@@ -41812,7 +41825,7 @@ class ItemGrantAdvancement extends Advancement {
     const existing = new Set(Object.values(added));
     for ( const uuid of selected ) {
       if ( existing.has(uuid) ) continue;
-      let itemData = retainedData.items?.find(i => i.flags?.dnd5e?.sourceId ?? i._stats?.compendiumSource);
+      let itemData = retainedData.items?.find(i => i.flags?.charliednd5e?.sourceId ?? i._stats?.compendiumSource);
       if ( !itemData ) {
         itemData = await this.createItemData(uuid);
         if ( !itemData ) continue;
@@ -41857,7 +41870,7 @@ class ItemGrantAdvancement extends Advancement {
     const updates = {};
     for ( const item of data.items ?? [] ) {
       this.actor.updateSource({ items: [item] });
-      updates[item._id] = item.flags.dnd5e.sourceId;
+      updates[item._id] = item.flags.charliednd5e.sourceId;
     }
     this.updateSource({
       "value.ability": data.ability,
@@ -41880,7 +41893,7 @@ class ItemGrantAdvancement extends Advancement {
       const item = this.actor.items.get(id);
       if ( item ) {
         items.push(item.toObject());
-        items[item.flags.dnd5e?.sourceId ?? item._stats.compendiumSource ?? item.uuid] = item.toObject();
+        items[item.flags.charliednd5e?.sourceId ?? item._stats.compendiumSource ?? item.uuid] = item.toObject();
       }
       this.actor.items.delete(id);
       added[`-=${id}`] = null;
@@ -42059,7 +42072,7 @@ class ItemChoiceAdvancement extends ItemGrantAdvancement {
     const items = [];
     const messages = [];
     for ( const item of data.items ?? [] ) {
-      const original = await fromUuid(item.flags.dnd5e.sourceId);
+      const original = await fromUuid(item.flags.charliednd5e.sourceId);
       try {
         original?.system.validatePrerequisites?.(this.actor, {
           level: level || this.actor.system.details?.level, throwError: true
@@ -43302,7 +43315,7 @@ class SubclassFlow extends AdvancementFlow$1 {
 
   /** @inheritDoc */
   async _prepareContext(options) {
-    const uuid = foundry.utils.getProperty(this.retainedData ?? {}, "flags.dnd5e.sourceId");
+    const uuid = foundry.utils.getProperty(this.retainedData ?? {}, "flags.charliednd5e.sourceId");
     if ( uuid ) await this.advancement.apply(this.level, { retainedData: this.retainedData, uuid });
     return super._prepareContext(options);
   }
@@ -43491,12 +43504,12 @@ class SubclassAdvancement extends Advancement {
   async apply(level, { retainedData={}, uuid }={}, options={}) {
     if ( options.initial ) return;
 
-    const useRetained = uuid === foundry.utils.getProperty(retainedData, "flags.dnd5e.sourceId");
+    const useRetained = uuid === foundry.utils.getProperty(retainedData, "flags.charliednd5e.sourceId");
     let itemData = useRetained ? retainedData : null;
     if ( !itemData ) {
       itemData = await this.createItemData(uuid);
-      delete itemData.flags?.dnd5e?.advancementOrigin;
-      delete itemData.flags?.dnd5e?.advancementRoot;
+      delete itemData.flags?.charliednd5e?.advancementOrigin;
+      delete itemData.flags?.charliednd5e?.advancementRoot;
       foundry.utils.setProperty(itemData, "system.classIdentifier", this.item.identifier);
     }
     if ( itemData ) {
@@ -43513,7 +43526,7 @@ class SubclassAdvancement extends Advancement {
     this.actor.updateSource({ items: [data] });
     this.updateSource({
       value: {
-        document: data._id, uuid: data._stats?.compendiumSource ?? data.flags?.dnd5e?.sourceId
+        document: data._id, uuid: data._stats?.compendiumSource ?? data.flags?.charliednd5e?.sourceId
       }
     });
   }
@@ -48542,7 +48555,7 @@ class BaseSettingsConfig extends Application5e {
       field: isDataField ? setting.type : new Field({ required: true, blank: false }),
       hint: game.i18n.localize(setting.hint),
       label: game.i18n.localize(setting.name),
-      value: game.settings.get("dnd5e", name)
+      value: game.settings.get("charliednd5e", name)
     };
     if ( (setting.type === Boolean) || (setting.type instanceof BooleanField$h) ) data.input = createCheckboxInput;
     if ( setting.choices ) data.options = Object.entries(setting.choices)
@@ -48568,9 +48581,9 @@ class BaseSettingsConfig extends Application5e {
     let requiresWorldReload = false;
     for ( const [key, value] of Object.entries(foundry.utils.expandObject(formData.object)) ) {
       const setting = game.settings.settings.get(`dnd5e.${key}`);
-      const current = game.settings.get("dnd5e", key, { document: true });
+      const current = game.settings.get("charliednd5e", key, { document: true });
       const prior = current?._source?.value ?? current;
-      const updated = await game.settings.set("dnd5e", key, value, { document: true });
+      const updated = await game.settings.set("charliednd5e", key, value, { document: true });
       if ( prior === (updated?._source?.value ?? updated) ) continue;
       requiresClientReload ||= (setting.scope !== "world") && setting.requiresReload;
       requiresWorldReload ||= (setting.scope === "world") && setting.requiresReload;
@@ -48608,7 +48621,7 @@ class BastionSettingsConfig extends BaseSettingsConfig {
   async _preparePartContext(partId, context, options) {
     context = await super._preparePartContext(partId, context, options);
     context.fields = BastionSetting.schema.fields;
-    context.source = game.settings.get("dnd5e", "bastionConfiguration");
+    context.source = game.settings.get("charliednd5e", "bastionConfiguration");
     return context;
   }
 }
@@ -48726,7 +48739,7 @@ class CalendarSettingsConfig extends BaseSettingsConfig {
    * @protected
    */
   async _prepareConfigContext(context, options) {
-    const data = game.settings.get("dnd5e", "calendarConfig");
+    const data = game.settings.get("charliednd5e", "calendarConfig");
     context.fields = Object.entries(CalendarConfigSetting.schema.fields)
       .filter(([name]) => name !== "buttons")
       .map(([name, field]) => ({
@@ -48760,7 +48773,7 @@ class CalendarSettingsConfig extends BaseSettingsConfig {
    * @protected
    */
   async _preparePreferencesContext(context, options) {
-    const data = game.settings.get("dnd5e", "calendarPreferences");
+    const data = game.settings.get("charliednd5e", "calendarPreferences");
     const fields = CalendarPreferencesSetting.schema.fields;
     context.fields = [
       {
@@ -48789,7 +48802,7 @@ class CalendarSettingsConfig extends BaseSettingsConfig {
         level: "warn",
         text: game.i18n.localize("DND5E.CALENDAR.Configuration.UnavailableMessage")
       };
-    } else if ( !game.settings.get("dnd5e", "calendarConfig")?.enabled ) {
+    } else if ( !game.settings.get("charliednd5e", "calendarConfig")?.enabled ) {
       context.disabled = !game.user.isGM;
       context.message = {
         level: "warn",
@@ -48930,7 +48943,7 @@ class ModuleArt {
    * @returns {Promise<void>}
    */
   async #parseArtMapping(moduleId, mapping, credit) {
-    let settings = game.settings.get("dnd5e", "moduleArtConfiguration")?.[moduleId];
+    let settings = game.settings.get("charliednd5e", "moduleArtConfiguration")?.[moduleId];
     settings ??= {portraits: true, tokens: true};
     for ( const [packName, actors] of Object.entries(mapping) ) {
       const pack = game.packs.get(packName);
@@ -48993,7 +49006,7 @@ class ModuleArt {
    * @returns {ModuleArtDescriptor[]}
    */
   static getArtModules() {
-    const settings = game.settings.get("dnd5e", "moduleArtConfiguration");
+    const settings = game.settings.get("charliednd5e", "moduleArtConfiguration");
     const unsorted = [];
     const configs = [];
 
@@ -49021,7 +49034,7 @@ class ModuleArt {
 class ModuleArtSettingsConfig extends FormApplication {
   /** @inheritDoc */
   constructor(object={}, options={}) {
-    object = foundry.utils.mergeObject(game.settings.get("dnd5e", "moduleArtConfiguration"), object, {inplace: false});
+    object = foundry.utils.mergeObject(game.settings.get("charliednd5e", "moduleArtConfiguration"), object, {inplace: false});
     super(object, options);
   }
 
@@ -49098,7 +49111,7 @@ class ModuleArtSettingsConfig extends FormApplication {
 
   /** @inheritDoc */
   async _updateObject(event, formData) {
-    await game.settings.set("dnd5e", "moduleArtConfiguration", foundry.utils.expandObject(formData));
+    await game.settings.set("charliednd5e", "moduleArtConfiguration", foundry.utils.expandObject(formData));
     return foundry.applications.settings.SettingsConfig.reloadConfirm({world: true});
   }
 }
@@ -49597,27 +49610,27 @@ const { StringField: StringField$r } = foundry.data.fields;
  * Register all of the system's keybindings.
  */
 function registerSystemKeybindings() {
-  game.keybindings.register("dnd5e", "skipDialogNormal", {
+  game.keybindings.register("charliednd5e", "skipDialogNormal", {
     name: "KEYBINDINGS.DND5E.SkipDialogNormal",
     editable: [{ key: "ShiftLeft" }, { key: "ShiftRight" }]
   });
 
-  game.keybindings.register("dnd5e", "skipDialogAdvantage", {
+  game.keybindings.register("charliednd5e", "skipDialogAdvantage", {
     name: "KEYBINDINGS.DND5E.SkipDialogAdvantage",
     editable: [{ key: "AltLeft" }, { key: "AltRight" }]
   });
 
-  game.keybindings.register("dnd5e", "skipDialogDisadvantage", {
+  game.keybindings.register("charliednd5e", "skipDialogDisadvantage", {
     name: "KEYBINDINGS.DND5E.SkipDialogDisadvantage",
     editable: [{ key: "ControlLeft" }, { key: "ControlRight" }, { key: "OsLeft" }, { key: "OsRight" }]
   });
 
-  game.keybindings.register("dnd5e", "dragCopy", {
+  game.keybindings.register("charliednd5e", "dragCopy", {
     name: "KEYBINDINGS.DND5E.DragCopy",
     editable: [{ key: "ControlLeft" }, { key: "ControlRight" }, { key: "AltLeft" }, { key: "AltRight" }]
   });
 
-  game.keybindings.register("dnd5e", "dragMove", {
+  game.keybindings.register("charliednd5e", "dragMove", {
     name: "KEYBINDINGS.DND5E.DragMove",
     editable: [{ key: "ShiftLeft" }, { key: "ShiftRight" }, { key: "OsLeft" }, { key: "OsRight" }]
   });
@@ -49630,7 +49643,7 @@ function registerSystemKeybindings() {
  */
 function registerSystemSettings() {
   // Internal System Migration Version
-  game.settings.register("dnd5e", "systemMigrationVersion", {
+  game.settings.register("charliednd5e", "systemMigrationVersion", {
     name: "System Migration Version",
     scope: "world",
     config: false,
@@ -49639,14 +49652,14 @@ function registerSystemSettings() {
   });
 
   // Polymorph Settings
-  game.settings.register("dnd5e", "transformationSettings", {
+  game.settings.register("charliednd5e", "transformationSettings", {
     scope: "client",
     config: false,
     type: TransformationSetting
   });
 
   // Rules version
-  game.settings.register("dnd5e", "rulesVersion", {
+  game.settings.register("charliednd5e", "rulesVersion", {
     name: "SETTINGS.DND5E.RULESVERSION.Name",
     hint: "SETTINGS.DND5E.RULESVERSION.Hint",
     scope: "world",
@@ -49661,7 +49674,7 @@ function registerSystemSettings() {
   });
 
   // Movement automation
-  game.settings.register("dnd5e", "movementAutomation", {
+  game.settings.register("charliednd5e", "movementAutomation", {
     name: "SETTINGS.DND5E.AUTOMATION.Movement.Name",
     hint: "SETTINGS.DND5E.AUTOMATION.Movement.Hint",
     scope: "world",
@@ -49676,7 +49689,7 @@ function registerSystemSettings() {
   });
 
   // Allow rotating square templates
-  game.settings.register("dnd5e", "gridAlignedSquareTemplates", {
+  game.settings.register("charliednd5e", "gridAlignedSquareTemplates", {
     name: "SETTINGS.5eGridAlignedSquareTemplatesN",
     hint: "SETTINGS.5eGridAlignedSquareTemplatesL",
     scope: "world",
@@ -49686,7 +49699,7 @@ function registerSystemSettings() {
   });
 
   // Loyalty
-  game.settings.register("dnd5e", "loyaltyScore", {
+  game.settings.register("charliednd5e", "loyaltyScore", {
     name: "SETTINGS.DND5E.LOYALTY.Name",
     hint: "SETTINGS.DND5E.LOYALTY.Hint",
     scope: "world",
@@ -49696,7 +49709,7 @@ function registerSystemSettings() {
   });
 
   // Disable Advancements
-  game.settings.register("dnd5e", "disableAdvancements", {
+  game.settings.register("charliednd5e", "disableAdvancements", {
     name: "SETTINGS.5eNoAdvancementsN",
     hint: "SETTINGS.5eNoAdvancementsL",
     scope: "world",
@@ -49706,7 +49719,7 @@ function registerSystemSettings() {
   });
 
   // Disable Concentration Tracking
-  game.settings.register("dnd5e", "disableConcentration", {
+  game.settings.register("charliednd5e", "disableConcentration", {
     name: "SETTINGS.5eNoConcentrationN",
     hint: "SETTINGS.5eNoConcentrationL",
     scope: "world",
@@ -49716,7 +49729,7 @@ function registerSystemSettings() {
   });
 
   // Collapse Item Cards (by default)
-  game.settings.register("dnd5e", "autoCollapseItemCards", {
+  game.settings.register("charliednd5e", "autoCollapseItemCards", {
     name: "SETTINGS.5eAutoCollapseCardN",
     hint: "SETTINGS.5eAutoCollapseCardL",
     scope: "client",
@@ -49729,7 +49742,7 @@ function registerSystemSettings() {
   });
 
   // Collapse Chat Card Trays
-  game.settings.register("dnd5e", "autoCollapseChatTrays", {
+  game.settings.register("charliednd5e", "autoCollapseChatTrays", {
     name: "SETTINGS.DND5E.COLLAPSETRAYS.Name",
     hint: "SETTINGS.DND5E.COLLAPSETRAYS.Hint",
     scope: "client",
@@ -49745,7 +49758,7 @@ function registerSystemSettings() {
   });
 
   // Allow Rests from Sheet
-  game.settings.register("dnd5e", "allowRests", {
+  game.settings.register("charliednd5e", "allowRests", {
     name: "SETTINGS.DND5E.PERMISSIONS.AllowRests.Name",
     hint: "SETTINGS.DND5E.PERMISSIONS.AllowRests.Hint",
     scope: "world",
@@ -49755,7 +49768,7 @@ function registerSystemSettings() {
   });
 
   // Allow Polymorphing
-  game.settings.register("dnd5e", "allowPolymorphing", {
+  game.settings.register("charliednd5e", "allowPolymorphing", {
     name: "SETTINGS.DND5E.PERMISSIONS.AllowTransformation.Name",
     hint: "SETTINGS.DND5E.PERMISSIONS.AllowTransformation.Hint",
     scope: "world",
@@ -49765,7 +49778,7 @@ function registerSystemSettings() {
   });
 
   // Allow Summoning
-  game.settings.register("dnd5e", "allowSummoning", {
+  game.settings.register("charliednd5e", "allowSummoning", {
     name: "SETTINGS.DND5E.PERMISSIONS.AllowSummoning.Name",
     hint: "SETTINGS.DND5E.PERMISSIONS.AllowSummoning.Hint",
     scope: "world",
@@ -49775,7 +49788,7 @@ function registerSystemSettings() {
   });
 
   // Metric Length Weights
-  game.settings.register("dnd5e", "metricLengthUnits", {
+  game.settings.register("charliednd5e", "metricLengthUnits", {
     name: "SETTINGS.DND5E.METRIC.LengthUnits.Name",
     hint: "SETTINGS.DND5E.METRIC.LengthUnits.Hint",
     scope: "world",
@@ -49785,7 +49798,7 @@ function registerSystemSettings() {
   });
 
   // Metric Volume Weights
-  game.settings.register("dnd5e", "metricVolumeUnits", {
+  game.settings.register("charliednd5e", "metricVolumeUnits", {
     name: "SETTINGS.DND5E.METRIC.VolumeUnits.Name",
     hint: "SETTINGS.DND5E.METRIC.VolumeUnits.Hint",
     scope: "world",
@@ -49795,7 +49808,7 @@ function registerSystemSettings() {
   });
 
   // Metric Unit Weights
-  game.settings.register("dnd5e", "metricWeightUnits", {
+  game.settings.register("charliednd5e", "metricWeightUnits", {
     name: "SETTINGS.DND5E.METRIC.WeightUnits.Name",
     hint: "SETTINGS.DND5E.METRIC.WeightUnits.Hint",
     scope: "world",
@@ -49805,7 +49818,7 @@ function registerSystemSettings() {
   });
 
   // Strict validation
-  game.settings.register("dnd5e", "strictValidation", {
+  game.settings.register("charliednd5e", "strictValidation", {
     scope: "world",
     config: false,
     type: Boolean,
@@ -49813,7 +49826,7 @@ function registerSystemSettings() {
   });
 
   // Dynamic art.
-  game.settings.registerMenu("dnd5e", "moduleArtConfiguration", {
+  game.settings.registerMenu("charliednd5e", "moduleArtConfiguration", {
     name: "DND5E.ModuleArtConfigN",
     label: "DND5E.ModuleArtConfigL",
     hint: "DND5E.ModuleArtConfigH",
@@ -49822,7 +49835,7 @@ function registerSystemSettings() {
     restricted: true
   });
 
-  game.settings.register("dnd5e", "moduleArtConfiguration", {
+  game.settings.register("charliednd5e", "moduleArtConfiguration", {
     name: "Module Art Configuration",
     scope: "world",
     config: false,
@@ -49836,7 +49849,7 @@ function registerSystemSettings() {
   });
 
   // Compendium Browser source exclusion
-  game.settings.registerMenu("dnd5e", "packSourceConfiguration", {
+  game.settings.registerMenu("charliednd5e", "packSourceConfiguration", {
     name: "DND5E.CompendiumBrowser.Sources.Name",
     label: "DND5E.CompendiumBrowser.Sources.Label",
     hint: "DND5E.CompendiumBrowser.Sources.Hint",
@@ -49845,7 +49858,7 @@ function registerSystemSettings() {
     restricted: true
   });
 
-  game.settings.register("dnd5e", "packSourceConfiguration", {
+  game.settings.register("charliednd5e", "packSourceConfiguration", {
     name: "Pack Source Configuration",
     scope: "world",
     config: false,
@@ -49862,7 +49875,7 @@ function registerSystemSettings() {
   });
 
   // Bastions
-  game.settings.registerMenu("dnd5e", "bastionConfiguration", {
+  game.settings.registerMenu("charliednd5e", "bastionConfiguration", {
     name: "DND5E.Bastion.Configuration.Name",
     label: "DND5E.Bastion.Configuration.Label",
     hint: "DND5E.Bastion.Configuration.Hint",
@@ -49871,7 +49884,7 @@ function registerSystemSettings() {
     restricted: true
   });
 
-  game.settings.register("dnd5e", "bastionConfiguration", {
+  game.settings.register("charliednd5e", "bastionConfiguration", {
     name: "Bastion Configuration",
     scope: "world",
     config: false,
@@ -49885,7 +49898,7 @@ function registerSystemSettings() {
   });
 
   // Calendar Settings
-  game.settings.registerMenu("dnd5e", "calendarConfiguration", {
+  game.settings.registerMenu("charliednd5e", "calendarConfiguration", {
     name: "DND5E.CALENDAR.Configuration.Name",
     label: "DND5E.CALENDAR.Configuration.Label",
     hint: "DND5E.CALENDAR.Configuration.Hint",
@@ -49893,7 +49906,7 @@ function registerSystemSettings() {
     type: CalendarSettingsConfig
   });
 
-  game.settings.register("dnd5e", "calendar", {
+  game.settings.register("charliednd5e", "calendar", {
     name: "DND5E.CALENDAR.FIELDS.calendar.label",
     hint: "DND5E.CALENDAR.FIELDS.calendar.hint",
     scope: "world",
@@ -49906,7 +49919,7 @@ function registerSystemSettings() {
     requiresReload: true
   });
 
-  game.settings.register("dnd5e", "calendarConfig", {
+  game.settings.register("charliednd5e", "calendarConfig", {
     name: "Calendar Configuration",
     scope: "world",
     config: false,
@@ -49914,7 +49927,7 @@ function registerSystemSettings() {
     onChange: () => dnd5e.ui.calendar?.onUpdateSettings?.()
   });
 
-  game.settings.register("dnd5e", "calendarPreferences", {
+  game.settings.register("charliednd5e", "calendarPreferences", {
     name: "Calendar Preferences",
     scope: "user",
     config: false,
@@ -49923,7 +49936,7 @@ function registerSystemSettings() {
   });
 
   // Combat Settings
-  game.settings.registerMenu("dnd5e", "combatConfiguration", {
+  game.settings.registerMenu("charliednd5e", "combatConfiguration", {
     name: "SETTINGS.DND5E.COMBAT.Name",
     label: "SETTINGS.DND5E.COMBAT.Label",
     hint: "SETTINGS.DND5E.COMBAT.Hint",
@@ -49932,7 +49945,7 @@ function registerSystemSettings() {
     restricted: true
   });
 
-  game.settings.register("dnd5e", "autoRecharge", {
+  game.settings.register("charliednd5e", "autoRecharge", {
     name: "SETTINGS.DND5E.NPCS.AutoRecharge.Name",
     hint: "SETTINGS.DND5E.NPCS.AutoRecharge.Hint",
     scope: "world",
@@ -49946,7 +49959,7 @@ function registerSystemSettings() {
     }
   });
 
-  game.settings.register("dnd5e", "autoRollNPCHP", {
+  game.settings.register("charliednd5e", "autoRollNPCHP", {
     name: "SETTINGS.DND5E.NPCS.AutoRollNPCHP.Name",
     hint: "SETTINGS.DND5E.NPCS.AutoRollNPCHP.Hint",
     scope: "world",
@@ -49960,7 +49973,7 @@ function registerSystemSettings() {
     }
   });
 
-  game.settings.register("dnd5e", "criticalDamageModifiers", {
+  game.settings.register("charliednd5e", "criticalDamageModifiers", {
     name: "SETTINGS.DND5E.CRITICAL.MultiplyModifiers.Name",
     hint: "SETTINGS.DND5E.CRITICAL.MultiplyModifiers.Hint",
     scope: "world",
@@ -49969,7 +49982,7 @@ function registerSystemSettings() {
     default: false
   });
 
-  game.settings.register("dnd5e", "criticalDamageMaxDice", {
+  game.settings.register("charliednd5e", "criticalDamageMaxDice", {
     name: "SETTINGS.DND5E.CRITICAL.MaxDice.Name",
     hint: "SETTINGS.DND5E.CRITICAL.MaxDice.Hint",
     scope: "world",
@@ -49978,7 +49991,7 @@ function registerSystemSettings() {
     default: false
   });
 
-  game.settings.register("dnd5e", "initiativeDexTiebreaker", {
+  game.settings.register("charliednd5e", "initiativeDexTiebreaker", {
     name: "SETTINGS.DND5E.COMBAT.DexTiebreaker.Name",
     hint: "SETTINGS.DND5E.COMBAT.DexTiebreaker.Hint",
     scope: "world",
@@ -49987,7 +50000,7 @@ function registerSystemSettings() {
     type: Boolean
   });
 
-  game.settings.register("dnd5e", "initiativeScore", {
+  game.settings.register("charliednd5e", "initiativeScore", {
     name: "SETTINGS.DND5E.COMBAT.InitiativeScore.Name",
     hint: "SETTINGS.DND5E.COMBAT.InitiativeScore.Hint",
     scope: "world",
@@ -50002,7 +50015,7 @@ function registerSystemSettings() {
   });
 
   // Variant Rules
-  game.settings.registerMenu("dnd5e", "variantRulesConfiguration", {
+  game.settings.registerMenu("charliednd5e", "variantRulesConfiguration", {
     name: "SETTINGS.DND5E.VARIANT.Name",
     label: "SETTINGS.DND5E.VARIANT.Label",
     hint: "SETTINGS.DND5E.VARIANT.Hint",
@@ -50011,7 +50024,7 @@ function registerSystemSettings() {
     restricted: true
   });
 
-  game.settings.register("dnd5e", "allowFeats", {
+  game.settings.register("charliednd5e", "allowFeats", {
     name: "SETTINGS.DND5E.VARIANT.AllowFeats.Name",
     hint: "SETTINGS.DND5E.VARIANT.AllowFeats.Hint",
     scope: "world",
@@ -50020,7 +50033,7 @@ function registerSystemSettings() {
     type: Boolean
   });
 
-  game.settings.register("dnd5e", "currencyWeight", {
+  game.settings.register("charliednd5e", "currencyWeight", {
     name: "SETTINGS.DND5E.VARIANT.CurrencyWeight.Name",
     hint: "SETTINGS.DND5E.VARIANT.CurrencyWeight.Hint",
     scope: "world",
@@ -50029,7 +50042,7 @@ function registerSystemSettings() {
     type: Boolean
   });
 
-  game.settings.register("dnd5e", "encumbrance", {
+  game.settings.register("charliednd5e", "encumbrance", {
     name: "SETTINGS.DND5E.VARIANT.Encumbrance.Name",
     hint: "SETTINGS.DND5E.VARIANT.Encumbrance.Hint",
     scope: "world",
@@ -50043,7 +50056,7 @@ function registerSystemSettings() {
     }
   });
 
-  game.settings.register("dnd5e", "honorScore", {
+  game.settings.register("charliednd5e", "honorScore", {
     name: "SETTINGS.DND5E.VARIANT.HonorScore.Name",
     hint: "SETTINGS.DND5E.VARIANT.HonorScore.Hint",
     scope: "world",
@@ -50053,7 +50066,7 @@ function registerSystemSettings() {
     requiresReload: true
   });
 
-  game.settings.register("dnd5e", "levelingMode", {
+  game.settings.register("charliednd5e", "levelingMode", {
     name: "SETTINGS.DND5E.VARIANT.LevelingMode.Name",
     hint: "SETTINGS.DND5E.VARIANT.LevelingMode.Hint",
     scope: "world",
@@ -50067,7 +50080,7 @@ function registerSystemSettings() {
     }
   });
 
-  game.settings.register("dnd5e", "proficiencyModifier", {
+  game.settings.register("charliednd5e", "proficiencyModifier", {
     name: "SETTINGS.DND5E.VARIANT.ProficiencyModifier.Name",
     hint: "SETTINGS.DND5E.VARIANT.ProficiencyModifier.Hint",
     scope: "world",
@@ -50080,7 +50093,7 @@ function registerSystemSettings() {
     }
   });
 
-  game.settings.register("dnd5e", "restVariant", {
+  game.settings.register("charliednd5e", "restVariant", {
     name: "SETTINGS.DND5E.VARIANT.Rest.Name",
     hint: "SETTINGS.DND5E.VARIANT.Rest.Hint",
     scope: "world",
@@ -50094,7 +50107,7 @@ function registerSystemSettings() {
     }
   });
 
-  game.settings.register("dnd5e", "sanityScore", {
+  game.settings.register("charliednd5e", "sanityScore", {
     name: "SETTINGS.DND5E.VARIANT.SanityScore.Name",
     hint: "SETTINGS.DND5E.VARIANT.SanityScore.Hint",
     scope: "world",
@@ -50105,7 +50118,7 @@ function registerSystemSettings() {
   });
 
   // Visibility Settings
-  game.settings.registerMenu("dnd5e", "visibilityConfiguration", {
+  game.settings.registerMenu("charliednd5e", "visibilityConfiguration", {
     name: "SETTINGS.DND5E.VISIBILITY.Name",
     label: "SETTINGS.DND5E.VISIBILITY.Label",
     hint: "SETTINGS.DND5E.VISIBILITY.Hint",
@@ -50114,7 +50127,7 @@ function registerSystemSettings() {
     restricted: true
   });
 
-  game.settings.register("dnd5e", "attackRollVisibility", {
+  game.settings.register("charliednd5e", "attackRollVisibility", {
     name: "SETTINGS.DND5E.VISIBILITY.Attack.Name",
     hint: "SETTINGS.DND5E.VISIBILITY.Attack.Hint",
     scope: "world",
@@ -50128,7 +50141,7 @@ function registerSystemSettings() {
     }
   });
 
-  game.settings.register("dnd5e", "bloodied", {
+  game.settings.register("charliednd5e", "bloodied", {
     name: "SETTINGS.DND5E.BLOODIED.Name",
     hint: "SETTINGS.DND5E.BLOODIED.Hint",
     scope: "world",
@@ -50142,7 +50155,7 @@ function registerSystemSettings() {
     }
   });
 
-  game.settings.register("dnd5e", "challengeVisibility", {
+  game.settings.register("charliednd5e", "challengeVisibility", {
     name: "SETTINGS.DND5E.VISIBILITY.Challenge.Name",
     hint: "SETTINGS.DND5E.VISIBILITY.Challenge.Hint",
     scope: "world",
@@ -50156,7 +50169,7 @@ function registerSystemSettings() {
     }
   });
 
-  game.settings.register("dnd5e", "concealItemDescriptions", {
+  game.settings.register("charliednd5e", "concealItemDescriptions", {
     name: "SETTINGS.DND5E.VISIBILITY.ItemDescriptions.Name",
     hint: "SETTINGS.DND5E.VISIBILITY.ItemDescriptions.Hint",
     scope: "world",
@@ -50166,7 +50179,7 @@ function registerSystemSettings() {
   });
 
   // Primary Group
-  game.settings.register("dnd5e", "primaryParty", {
+  game.settings.register("charliednd5e", "primaryParty", {
     name: "Primary Party",
     scope: "world",
     config: false,
@@ -50176,7 +50189,7 @@ function registerSystemSettings() {
   });
 
   // Control hints
-  game.settings.register("dnd5e", "controlHints", {
+  game.settings.register("charliednd5e", "controlHints", {
     name: "DND5E.Controls.Name",
     hint: "DND5E.Controls.Hint",
     scope: "client",
@@ -50186,7 +50199,7 @@ function registerSystemSettings() {
   });
 
   // NPC sheet default skills
-  game.settings.register("dnd5e", "defaultSkills", {
+  game.settings.register("charliednd5e", "defaultSkills", {
     name: "SETTINGS.DND5E.DEFAULTSKILLS.Name",
     hint: "SETTINGS.DND5E.DEFAULTSKILLS.Hint",
     type: new foundry.data.fields.SetField(
@@ -50210,7 +50223,7 @@ function cacheSettings() {
   dnd5e.settings = {};
   for ( const setting of game.settings.settings.values() ) {
     const { key, namespace, onChange, requiresReload, scope } = setting;
-    if ( (scope !== "world") || (namespace !== "dnd5e") ) continue;
+    if ( (scope !== "world") || (namespace !== "charliednd5e") ) continue;
     dnd5e.settings[key] = game.settings.get(namespace, key);
     if ( !requiresReload ) setting.onChange = (value, ...args) => {
       dnd5e.settings[key] = value;
@@ -50225,7 +50238,7 @@ function cacheSettings() {
  * Register additional settings after modules have had a chance to initialize to give them a chance to modify choices.
  */
 function registerDeferredSettings() {
-  game.settings.register("dnd5e", "theme", {
+  game.settings.register("charliednd5e", "theme", {
     name: "SETTINGS.DND5E.THEME.Name",
     hint: "SETTINGS.DND5E.THEME.Hint",
     scope: "client",
@@ -50240,10 +50253,10 @@ function registerDeferredSettings() {
   });
 
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-    setTheme(document.body, game.settings.get("dnd5e", "theme"));
+    setTheme(document.body, game.settings.get("charliednd5e", "theme"));
   });
   matchMedia("(prefers-contrast: more)").addEventListener("change", () => {
-    setTheme(document.body, game.settings.get("dnd5e", "theme"));
+    setTheme(document.body, game.settings.get("charliednd5e", "theme"));
   });
 
   // Hook into core color scheme setting.
@@ -52361,7 +52374,7 @@ class ItemSheet5e extends PrimarySheetMixin(DocumentSheet5e) {
   async _prepareEffectsContext(context, options) {
     const effectMap = {};
     const riders = [];
-    const riderIds = new Set(this.item.getFlag("dnd5e", "riders.effect") ?? []);
+    const riderIds = new Set(this.item.getFlag("charliednd5e", "riders.effect") ?? []);
     context.tab = context.tabs.effects;
     context.effects = EffectsElement.prepareCategories(this.item.effects, { parent: this.item });
     for ( const category of Object.values(context.effects) ) {
@@ -53013,7 +53026,7 @@ class ItemSheet5e extends PrimarySheetMixin(DocumentSheet5e) {
     }
 
     if ( !advancements.length ) return false;
-    if ( this.item.actor?.system.metadata?.supportsAdvancement && !game.settings.get("dnd5e", "disableAdvancements") ) {
+    if ( this.item.actor?.system.metadata?.supportsAdvancement && !game.settings.get("charliednd5e", "disableAdvancements") ) {
       const manager = AdvancementManager.forNewAdvancement(this.item.actor, this.item.id, advancements);
       if ( manager.steps.length ) return this._renderChild(manager);
     }
@@ -54512,8 +54525,8 @@ class InitiativeConfig extends BaseConfigSheet {
     context.flags = {
       alert: {
         field: new BooleanField$e({ label: game.i18n.localize("DND5E.FlagsAlert") }),
-        name: "flags.dnd5e.initiativeAlert",
-        value: source.flags.dnd5e?.initiativeAlert
+        name: "flags.charliednd5e.initiativeAlert",
+        value: source.flags.charliednd5e?.initiativeAlert
       }
     };
 
@@ -55397,7 +55410,7 @@ class ItemListControlsElement extends MaybeAdoptable$3 {
    * @type {TabPreferences5e}
    */
   get prefs() {
-    return game.user.getFlag("dnd5e", `sheetPrefs.${this.app.document.type}.tabs.${this.tab}`);
+    return game.user.getFlag("charliednd5e", `sheetPrefs.${this.app.document.type}.tabs.${this.tab}`);
   }
 
   /* -------------------------------------------- */
@@ -55676,8 +55689,8 @@ class ItemListControlsElement extends MaybeAdoptable$3 {
     const { action } = event.currentTarget.dataset;
     const flag = `sheetPrefs.${this.app.document.type}.tabs.${this.tab}.${action}`;
     const modes = Object.keys(action === "group" ? this.#groups : this.#modes);
-    const current = Math.max(0, modes.indexOf(game.user.getFlag("dnd5e", flag)));
-    await game.user.setFlag("dnd5e", flag, modes[(current + 1) % modes.length]);
+    const current = Math.max(0, modes.indexOf(game.user.getFlag("charliednd5e", flag)));
+    await game.user.setFlag("charliednd5e", flag, modes[(current + 1) % modes.length]);
     if ( action === "group" ) {
       this._initGrouping();
       this._applyGrouping();
@@ -55717,7 +55730,7 @@ class BaseActorSheet extends PrimarySheetMixin(
   constructor(options={}) {
     // Set initial size based on saved size
     const key = `${options.document?.type}${options.document?.limited ? ":limited" : ""}`;
-    const { width, height } = game.user.getFlag("dnd5e", `sheetPrefs.${key}`) ?? {};
+    const { width, height } = game.user.getFlag("charliednd5e", `sheetPrefs.${key}`) ?? {};
     options.position ??= {};
     if ( width && !("width" in options.position) ) options.position.width = width;
     if ( height && !("height" in options.position) ) options.position.height = height;
@@ -55874,7 +55887,7 @@ class BaseActorSheet extends PrimarySheetMixin(
         ? this.actor.system.source.rules === "2024"
         : dnd5e.settings.rulesVersion === "modern",
       rollableClass: this.isEditable ? "rollable" : "",
-      sidebarCollapsed: !!game.user.getFlag("dnd5e", this._sidebarCollapsedKeyPath),
+      sidebarCollapsed: !!game.user.getFlag("charliednd5e", this._sidebarCollapsedKeyPath),
       system: this.actor.system,
       user: game.user,
       warnings: foundry.utils.deepClone(this.actor._preparationWarnings)
@@ -56008,13 +56021,13 @@ class BaseActorSheet extends PrimarySheetMixin(
       classes: Object.values(this.document.classes)
         .map(cls => ({ value: cls.id, label: cls.name }))
         .sort((lhs, rhs) => lhs.label.localeCompare(rhs.label, game.i18n.lang)),
-      data: source.flags?.dnd5e ?? {},
+      data: source.flags?.charliednd5e ?? {},
       disabled: this._mode === this.constructor.MODES.PLAY
     };
 
     // Character Flags
     for ( const [key, config] of Object.entries(CONFIG.DND5E.characterFlags) ) {
-      const flag = { ...config, name: `flags.dnd5e.${key}`, value: foundry.utils.getProperty(flags.data, key) };
+      const flag = { ...config, name: `flags.charliednd5e.${key}`, value: foundry.utils.getProperty(flags.data, key) };
       const fieldOptions = { label: config.name, hint: config.hint };
       if ( config.type === Boolean ) {
         flag.field = new BooleanField$d(fieldOptions);
@@ -56276,7 +56289,7 @@ class BaseActorSheet extends PrimarySheetMixin(
       method = spellcasting?.getSpellSlotKey?.(level) ?? method;
 
       // Spells from items
-      if ( spell.getFlag("dnd5e", "cachedFor") ) {
+      if ( spell.getFlag("charliednd5e", "cachedFor") ) {
         method = "item";
         if ( !spell.system.linkedActivity?.displayInSpellbook ) return;
         registerSection(method);
@@ -56499,7 +56512,7 @@ class BaseActorSheet extends PrimarySheetMixin(
       : game.i18n.localize("DND5E.AbbreviationDC") : null;
 
     // Linked Uses
-    const cachedFor = fromUuidSync(item.flags.dnd5e?.cachedFor, { relative: item.parent, strict: false });
+    const cachedFor = fromUuidSync(item.flags.charliednd5e?.cachedFor, { relative: item.parent, strict: false });
     if ( cachedFor ) {
       const targetItemUses = cachedFor.consumption?.targets.find(t => t.type === "itemUses");
       ctx.linkedUses = cachedFor.consumption?.targets.find(t => t.type === "activityUses")
@@ -56630,7 +56643,7 @@ class BaseActorSheet extends PrimarySheetMixin(
       sourceLabel = grantingItem?.name;
     } else {
       // Check spells added from advancements
-      const advancementOrigin = item.getFlag("dnd5e", "advancementOrigin");
+      const advancementOrigin = item.getFlag("charliednd5e", "advancementOrigin");
       if ( advancementOrigin ) {
         const [itemId] = advancementOrigin.split(".");
         const grantingItem = item.parent.items.get(itemId);
@@ -56798,7 +56811,7 @@ class BaseActorSheet extends PrimarySheetMixin(
 
     // Collapse sidebar
     if ( this.tabGroups.primary ) {
-      const sidebarCollapsed = !!game.user.getFlag("dnd5e", this._sidebarCollapsedKeyPath);
+      const sidebarCollapsed = !!game.user.getFlag("charliednd5e", this._sidebarCollapsedKeyPath);
       this.element.classList.toggle("sidebar-collapsed", sidebarCollapsed);
     }
 
@@ -56889,7 +56902,7 @@ class BaseActorSheet extends PrimarySheetMixin(
     const classId = event.target.closest("[data-item-id]")?.dataset.itemId;
     if ( !delta || !classId ) return;
     const classItem = this.actor.items.get(classId);
-    if ( !game.settings.get("dnd5e", "disableAdvancements") ) {
+    if ( !game.settings.get("charliednd5e", "disableAdvancements") ) {
       const manager = AdvancementManager.forLevelChange(this.actor, classId, delta);
       if ( manager.steps.length ) {
         if ( delta > 0 ) return this._renderChild(manager);
@@ -56921,7 +56934,7 @@ class BaseActorSheet extends PrimarySheetMixin(
     }));
 
     // Toggle sidebar
-    const sidebarCollapsed = game.user.getFlag("dnd5e", this._sidebarCollapsedKeyPath);
+    const sidebarCollapsed = game.user.getFlag("charliednd5e", this._sidebarCollapsedKeyPath);
     if ( sidebarCollapsed !== undefined ) this._toggleSidebar(sidebarCollapsed);
   }
 
@@ -57097,7 +57110,7 @@ class BaseActorSheet extends PrimarySheetMixin(
     if ( height !== "auto" ) prefs.height = height;
     if ( foundry.utils.isEmpty(prefs) ) return;
     const key = `${this.actor.type}${this.actor.limited ? ":limited": ""}`;
-    game.user.setFlag("dnd5e", `sheetPrefs.${key}`, prefs);
+    game.user.setFlag("charliednd5e", `sheetPrefs.${key}`, prefs);
   }
 
   /* -------------------------------------------- */
@@ -57237,7 +57250,7 @@ class BaseActorSheet extends PrimarySheetMixin(
    */
   static #toggleSidebar(event, target) {
     const collapsed = this._toggleSidebar();
-    game.user.setFlag("dnd5e", this._sidebarCollapsedKeyPath, collapsed);
+    game.user.setFlag("charliednd5e", this._sidebarCollapsedKeyPath, collapsed);
   }
 
   /* -------------------------------------------- */
@@ -57270,15 +57283,15 @@ class BaseActorSheet extends PrimarySheetMixin(
     const submitData = super._processFormData(event, form, formData);
 
     // Remove any flags that are false-ish
-    for ( const [key, value] of Object.entries(submitData.flags?.dnd5e ?? {}) ) {
+    for ( const [key, value] of Object.entries(submitData.flags?.charliednd5e ?? {}) ) {
       if ( value ) continue;
 
       // Keep the flag for synthetic actor overrides
-      if ( this.actor.isToken && this.actor.parent.baseActor.getFlag("dnd5e", key) ) continue;
+      if ( this.actor.isToken && this.actor.parent.baseActor.getFlag("charliednd5e", key) ) continue;
 
-      delete submitData.flags.dnd5e[key];
-      if ( foundry.utils.hasProperty(this.document._source, `flags.dnd5e.${key}`) ) {
-        submitData.flags.dnd5e[`-=${key}`] = null;
+      delete submitData.flags.charliednd5e[key];
+      if ( foundry.utils.hasProperty(this.document._source, `flags.charliednd5e.${key}`) ) {
+        submitData.flags.charliednd5e[`-=${key}`] = null;
       }
     }
 
@@ -57382,16 +57395,16 @@ class BaseActorSheet extends PrimarySheetMixin(
 
   /** @override */
   async _onDropActor(event, actor) {
-    const canPolymorph = game.user.isGM || (this.actor.isOwner && game.settings.get("dnd5e", "allowPolymorphing"));
+    const canPolymorph = game.user.isGM || (this.actor.isOwner && game.settings.get("charliednd5e", "allowPolymorphing"));
     if ( !canPolymorph || (this.tabGroups.primary === "bastion") ) return;
 
     // Configure the transformation
     const settings = await TransformDialog.promptSettings(this.actor, actor, {
-      transform: { settings: game.settings.get("dnd5e", "transformationSettings") },
+      transform: { settings: game.settings.get("charliednd5e", "transformationSettings") },
       windowId: this.window?.windowId
     });
     if ( !settings ) return;
-    await game.settings.set("dnd5e", "transformationSettings", settings.toObject());
+    await game.settings.set("charliednd5e", "transformationSettings", settings.toObject());
 
     return this.actor.transformInto(actor, settings);
   }
@@ -57489,7 +57502,7 @@ class BaseActorSheet extends PrimarySheetMixin(
     behavior ??= event._behavior;
     const itemsWithoutAdvancement = items.filter(i => !i.system.advancement?.size);
     const multipleAdvancements = (items.length - itemsWithoutAdvancement.length) > 1;
-    if ( multipleAdvancements && !game.settings.get("dnd5e", "disableAdvancements") ) {
+    if ( multipleAdvancements && !game.settings.get("charliednd5e", "disableAdvancements") ) {
       ui.notifications.warn(game.i18n.format("DND5E.WarnCantAddMultipleAdvancements"));
       items = itemsWithoutAdvancement;
     }
@@ -57557,7 +57570,7 @@ class BaseActorSheet extends PrimarySheetMixin(
 
     // Bypass normal creation flow for any items with advancement
     if ( actor.system.metadata?.supportsAdvancement && !foundry.utils.isEmpty(itemData.system.advancement)
-        && !game.settings.get("dnd5e", "disableAdvancements") ) {
+        && !game.settings.get("charliednd5e", "disableAdvancements") ) {
       // Ensure that this item isn't violating the singleton rule
       const dataModel = CONFIG.Item.dataModels[itemData.type];
       const singleton = dataModel?.metadata.singleton ?? false;
@@ -58287,8 +58300,8 @@ class CharacterActorSheet extends BaseActorSheet {
     }
 
     // Visibility
-    context.showExperience = game.settings.get("dnd5e", "levelingMode") !== "noxp";
-    context.showRests = game.user.isGM || (this.actor.isOwner && game.settings.get("dnd5e", "allowRests"));
+    context.showExperience = game.settings.get("charliednd5e", "levelingMode") !== "noxp";
+    context.showRests = game.user.isGM || (this.actor.isOwner && game.settings.get("charliednd5e", "allowRests"));
 
     return context;
   }
@@ -58643,7 +58656,7 @@ class CharacterActorSheet extends BaseActorSheet {
 
     await super._prepareItemFeature(item, ctx);
 
-    const [originId] = (item.getFlag("dnd5e", "advancementRoot") ?? item.getFlag("dnd5e", "advancementOrigin"))
+    const [originId] = (item.getFlag("charliednd5e", "advancementRoot") ?? item.getFlag("charliednd5e", "advancementOrigin"))
       ?.split(".") ?? [];
     const group = item.parent.items.get(originId);
     ctx.groups.origin = "other";
@@ -59048,7 +59061,7 @@ class CharacterActorSheet extends BaseActorSheet {
       const cls = this.actor.itemTypes.class.find(c => c.identifier === itemData.system.identifier);
       if ( cls ) {
         const priorLevel = cls.system.levels;
-        if ( !game.settings.get("dnd5e", "disableAdvancements") ) {
+        if ( !game.settings.get("charliednd5e", "disableAdvancements") ) {
           const manager = AdvancementManager.forLevelChange(this.actor, cls.id, itemData.system.levels);
           if ( manager.steps.length ) {
             manager.render({ force: true });
@@ -59139,7 +59152,7 @@ class CharacterActorSheet extends BaseActorSheet {
   static hasBastion(actor) {
     const { basic, special } = CONFIG.DND5E.facilities.advancement;
     const threshold = Math.min(...Object.keys(basic), ...Object.keys(special));
-    return game.settings.get("dnd5e", "bastionConfiguration")?.enabled && (actor.system.details.level >= threshold);
+    return game.settings.get("charliednd5e", "bastionConfiguration")?.enabled && (actor.system.details.level >= threshold);
   }
 }
 
@@ -59226,7 +59239,7 @@ class MultiActorSheet extends BaseActorSheet {
    * @protected
    */
   async _prepareMemberPortrait(actor, context) {
-    const showTokenPortrait = this.actor.getFlag("dnd5e", "showTokenPortrait");
+    const showTokenPortrait = this.actor.getFlag("charliednd5e", "showTokenPortrait");
     const token = actor.isToken ? actor.token : actor.prototypeToken;
     const defaults = Actor.implementation.getDefaultArtwork(actor._source);
     let src = showTokenPortrait ? token.texture.src : actor.img;
@@ -59356,7 +59369,7 @@ class MultiActorSheet extends BaseActorSheet {
    */
   static addDocumentSheetConfigOptions(app, html) {
     const { document: doc } = app.options;
-    const showTokenPortrait = doc.getFlag("dnd5e", "showTokenPortrait");
+    const showTokenPortrait = doc.getFlag("charliednd5e", "showTokenPortrait");
     const artOptions = {
       false: game.i18n.localize("DND5E.Group.Config.Art.portraits"),
       true: game.i18n.localize("DND5E.Group.Config.Art.tokens")
@@ -59367,7 +59380,7 @@ class MultiActorSheet extends BaseActorSheet {
       <div class="form-group">
         <label>${game.i18n.localize("DND5E.Group.Config.Art.Label")}</label>
         <div class="form-fields">
-          <select name="flags.dnd5e.showTokenPortrait" data-dtype="Boolean">
+          <select name="flags.charliednd5e.showTokenPortrait" data-dtype="Boolean">
             ${foundry.applications.handlebars.selectOptions(artOptions, { hash: { selected: showTokenPortrait } })}
           </select>
         </div>
@@ -59623,7 +59636,7 @@ class EncounterActorSheet extends MultiActorSheet {
     new Award({
       award: {
         currency: { ...this.actor.system.currency },
-        savedDestinations: this.actor.getFlag("dnd5e", "awardDestinations"),
+        savedDestinations: this.actor.getFlag("charliednd5e", "awardDestinations"),
         xp: await this.actor.system.getXPValue()
       }
     }).render({ force: true });
@@ -59803,7 +59816,7 @@ class GroupActorSheet extends MultiActorSheet {
 
   /** @inheritDoc */
   get inventorySource() {
-    const inventorySource = this.actor.getFlag("dnd5e", "inventorySource") ?? "group";
+    const inventorySource = this.actor.getFlag("charliednd5e", "inventorySource") ?? "group";
     const { primaryVehicle } = this.actor.system;
     if ( (inventorySource === "vehicle") && primaryVehicle?.isOwner ) return primaryVehicle;
     return super.inventorySource;
@@ -59835,7 +59848,7 @@ class GroupActorSheet extends MultiActorSheet {
    * @protected
    */
   async _prepareHeaderContext(context, options) {
-    context.showXP = game.settings.get("dnd5e", "levelingMode") !== "noxp";
+    context.showXP = game.settings.get("charliednd5e", "levelingMode") !== "noxp";
     context.travelPace = this.actor.system.getTravelPace();
     return context;
   }
@@ -59981,7 +59994,7 @@ class GroupActorSheet extends MultiActorSheet {
     const { pct, max, value } = encumbrance;
     const defaultUnits = CONFIG.DND5E.encumbrance.baseUnits.default;
     const baseUnits = CONFIG.DND5E.encumbrance.baseUnits[actor.type] ?? defaultUnits;
-    const systemUnits = game.settings.get("dnd5e", "metricWeightUnits") ? "metric" : "imperial";
+    const systemUnits = game.settings.get("charliednd5e", "metricWeightUnits") ? "metric" : "imperial";
     context.encumbrance = {
       pct,
       max: convertWeight(max, baseUnits[systemUnits], defaultUnits[systemUnits]),
@@ -60098,7 +60111,7 @@ class GroupActorSheet extends MultiActorSheet {
    */
   static #onAward() {
     new Award({
-      award: { savedDestinations: this.actor.getFlag("dnd5e", "awardDestinations") },
+      award: { savedDestinations: this.actor.getFlag("charliednd5e", "awardDestinations") },
       origin: this.actor
     }).render({ force: true });
   }
@@ -60176,7 +60189,7 @@ class GroupActorSheet extends MultiActorSheet {
    */
   static #onToggleInventory(event, target) {
     const { inventory } = target.dataset;
-    this.actor.setFlag("dnd5e", "inventorySource", inventory);
+    this.actor.setFlag("charliednd5e", "inventorySource", inventory);
   }
 
   /* -------------------------------------------- */
@@ -60635,8 +60648,8 @@ class NPCActorSheet extends BaseActorSheet {
       context.showDeathSaves = context.important && !context.system.attributes.hp.value;
       context.showInitiativeScore = dnd5e.settings.rulesVersion === "modern";
     }
-    context.showLoyalty = context.important && game.settings.get("dnd5e", "loyaltyScore") && game.user.isGM;
-    context.showRests = game.user.isGM || (this.actor.isOwner && game.settings.get("dnd5e", "allowRests"));
+    context.showLoyalty = context.important && game.settings.get("charliednd5e", "loyaltyScore") && game.user.isGM;
+    context.showRests = game.user.isGM || (this.actor.isOwner && game.settings.get("charliednd5e", "allowRests"));
 
     return context;
   }
@@ -60705,7 +60718,7 @@ class NPCActorSheet extends BaseActorSheet {
     });
 
     // Skills & Tools
-    const skillSetting = game.settings.get("dnd5e", "defaultSkills");
+    const skillSetting = game.settings.get("charliednd5e", "defaultSkills");
     context.skills = this._prepareSkillsTools(context, "skills")
       .filter(v => v.prof.multiplier || skillSetting.has(v.key) || v.bonuses.check || v.bonuses.passive);
     context.tools = this._prepareSkillsTools(context, "tools");
@@ -61092,9 +61105,9 @@ class VehicleActorSheet extends BaseActorSheet {
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     context.options = {
-      showAbilities: this.actor.getFlag("dnd5e", "showVehicleAbilities"),
-      showInitiative: this.actor.getFlag("dnd5e", "showVehicleInitiative"),
-      showQuality: this.actor.getFlag("dnd5e", "showVehicleQuality")
+      showAbilities: this.actor.getFlag("charliednd5e", "showVehicleAbilities"),
+      showInitiative: this.actor.getFlag("charliednd5e", "showVehicleInitiative"),
+      showQuality: this.actor.getFlag("charliednd5e", "showVehicleQuality")
     };
     return context;
   }
@@ -61284,7 +61297,7 @@ class VehicleActorSheet extends BaseActorSheet {
    */
   async _prepareDraftAnimals() {
     const { baseUnits, draftMultiplier } = CONFIG.DND5E.encumbrance;
-    const unitSystem = game.settings.get("dnd5e", "metricWeightUnits") ? "metric" : "imperial";
+    const unitSystem = game.settings.get("charliednd5e", "metricWeightUnits") ? "metric" : "imperial";
     const units = baseUnits.default[unitSystem];
     return Promise.all(this.actor.system.draft.value.map(async uuid => {
       const actor = await fromUuid(uuid);
@@ -61380,7 +61393,7 @@ class VehicleActorSheet extends BaseActorSheet {
       || context.itemCategories.features?.length
       || context.itemCategories.stations?.length
       || context.system.draft?.value.length
-      || this.actor.getFlag("dnd5e", "showVehicleAbilities");
+      || this.actor.getFlag("charliednd5e", "showVehicleAbilities");
     this.element.classList.toggle("has-stations", !!hasStations);
   }
 
@@ -62129,7 +62142,7 @@ class ItemGrantFlow extends AdvancementFlow {
    */
   async getContext() {
     const config = this.advancement.configuration;
-    const added = this.retainedData?.items.map(i => foundry.utils.getProperty(i, "flags.dnd5e.sourceId"))
+    const added = this.retainedData?.items.map(i => foundry.utils.getProperty(i, "flags.charliednd5e.sourceId"))
       ?? this.advancement.value.added;
     const checked = new Set(Object.values(added ?? {}));
     return {
@@ -62197,7 +62210,7 @@ class ItemGrantFlow extends AdvancementFlow {
   /** @inheritDoc */
   async _updateObject(event, formData) {
     const retainedData = this.retainedData?.items.reduce((obj, i) => {
-      obj[foundry.utils.getProperty(i, "flags.dnd5e.sourceId")] = i;
+      obj[foundry.utils.getProperty(i, "flags.charliednd5e.sourceId")] = i;
       return obj;
     }, {});
     await this.advancement.apply(this.level, formData, retainedData);
@@ -62769,7 +62782,7 @@ function TargetedApplicationMixin(Base) {
       this.targetSourceControl.querySelectorAll("button").forEach(b =>
         b.addEventListener("click", this._onChangeTargetMode.bind(this))
       );
-      if ( !this.chatMessage?.getFlag("dnd5e", "targets")?.length ) this.targetSourceControl.hidden = true;
+      if ( !this.chatMessage?.getFlag("charliednd5e", "targets")?.length ) this.targetSourceControl.hidden = true;
 
       this.targetList = document.createElement("ul");
       this.targetList.classList.add("targets", "unlist");
@@ -62787,7 +62800,7 @@ function TargetedApplicationMixin(Base) {
       const targetedTokens = new Map();
       switch ( this.targetingMode ) {
         case "targeted":
-          this.chatMessage?.getFlag("dnd5e", "targets")?.forEach(t => targetedTokens.set(t.uuid, t.name));
+          this.chatMessage?.getFlag("charliednd5e", "targets")?.forEach(t => targetedTokens.set(t.uuid, t.name));
           break;
         case "selected":
           canvas.tokens?.controlled?.forEach(t => {
@@ -63166,7 +63179,7 @@ class DamageApplicationElement extends TargetedApplicationMixin(ChatTrayElement)
       const options = this.getTargetOptions(target.dataset.targetUuid);
       await token?.applyDamage(this.damages, { ...options, isDelta: true, origin: this.chatMessage });
     }
-    if ( game.settings.get("dnd5e", "autoCollapseChatTrays") !== "manual" ) {
+    if ( game.settings.get("charliednd5e", "autoCollapseChatTrays") !== "manual" ) {
       this.open = false;
     }
   }
@@ -63425,7 +63438,7 @@ class EffectApplicationElement extends TargetedApplicationMixin(ChatTrayElement)
 
     const effectFlags = {
       flags: {
-        dnd5e: {
+        charliednd5e: {
           dependentOn: origin.uuid,
           scaling: this.chatMessage.system.scaling,
           spellLevel: this.chatMessage.system.spellLevel
@@ -63475,7 +63488,7 @@ class EffectApplicationElement extends TargetedApplicationMixin(ChatTrayElement)
         Hooks.onError("EffectApplicationElement._applyEffectToToken", err, { notify: "warn", log: "warn" });
       }
     }
-    if ( game.settings.get("dnd5e", "autoCollapseChatTrays") !== "manual" ) {
+    if ( game.settings.get("charliednd5e", "autoCollapseChatTrays") !== "manual" ) {
       this.querySelector(".collapsible").dispatchEvent(new PointerEvent("click", { bubbles: true, cancelable: true }));
     }
   }
@@ -63591,7 +63604,7 @@ class EnchantmentApplicationElement extends MaybeAdoptable$2 {
     // Calculate the maximum targets
     let item = this.enchantmentItem;
     const scaling = this.chatMessage.system.scaling;
-    if ( scaling ) item = item.clone({ "flags.dnd5e.scaling": scaling });
+    if ( scaling ) item = item.clone({ "flags.charliednd5e.scaling": scaling });
     const activity = item.system.activities.get(this.enchantmentActivity.id);
     const maxTargets = activity.target?.affects?.count;
     if ( maxTargets ) {
@@ -63668,7 +63681,7 @@ class EnchantmentApplicationElement extends MaybeAdoptable$2 {
     }
 
     this.enchantmentActivity.applyEnchantment(
-      this.chatMessage.getFlag("dnd5e", "use.enchantmentProfile"),
+      this.chatMessage.getFlag("charliednd5e", "use.enchantmentProfile"),
       droppedItem,
       { chatMessage: this.chatMessage, concentration }
     );
@@ -64469,7 +64482,7 @@ class InventoryElement extends (foundry.applications.elements.AdoptableHTMLEleme
       name: "DND5E.Scroll.CreateScroll",
       icon: '<i class="fa-solid fa-scroll"></i>',
       condition: () => {
-        const isSpell = (item.type === "spell") && !item.getFlag("dnd5e", "cachedFor");
+        const isSpell = (item.type === "spell") && !item.getFlag("charliednd5e", "cachedFor");
         const canEdit = this.actor.isOwner && !this.actor.collection.locked;
         return isSpell && canEdit;
       },
@@ -64509,7 +64522,7 @@ class InventoryElement extends (foundry.applications.elements.AdoptableHTMLEleme
         const isPrepared = CONFIG.DND5E.spellcasting[item.system.method]?.prepares;
         const isAlways = item.system.prepared === CONFIG.DND5E.spellPreparationStates.always.value;
         const canEdit = item.isOwner && !compendiumLocked;
-        return !item.hasRecharge && isPrepared && !isAlways && canEdit && !item.getFlag("dnd5e", "cachedFor");
+        return !item.hasRecharge && isPrepared && !isAlways && canEdit && !item.getFlag("charliednd5e", "cachedFor");
       },
       callback: li => this._onAction(li, "prepare"),
       group: "state"
@@ -66853,14 +66866,14 @@ class JournalNavigationConfig extends DocumentSheet5e {
   /** @inheritDoc */
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
-    const data = this.document.getFlag("dnd5e", "navigation") ?? {};
+    const data = this.document.getFlag("charliednd5e", "navigation") ?? {};
     const entryOptions = getCollectionDocumentOptions(this.document.collection, {
       disabled: entry => entry._id === this.document.id
     });
     context.fields = ["previous", "up", "next"].map(name => ({
       field: new StringField$o(),
       label: game.i18n.localize(`DND5E.JOURNALENTRY.Navigation.${name.capitalize()}`),
-      name: `flags.dnd5e.navigation.${name}`,
+      name: `flags.charliednd5e.navigation.${name}`,
       options: entryOptions,
       value: data[name]
     }));
@@ -66875,10 +66888,10 @@ class JournalNavigationConfig extends DocumentSheet5e {
   _processFormData(event, form, formData) {
     const submitData = super._processFormData(event, form, formData);
 
-    const navigation = submitData.flags.dnd5e.navigation;
-    const keys = Object.keys(this.document.flags.dnd5e ?? {});
+    const navigation = submitData.flags.charliednd5e.navigation;
+    const keys = Object.keys(this.document.flags.charliednd5e ?? {});
     if ( Object.values(navigation).some(v => v) ) {
-      submitData.flags.dnd5e.navigation = Object.entries(navigation).reduce((obj, [k, v]) => {
+      submitData.flags.charliednd5e.navigation = Object.entries(navigation).reduce((obj, [k, v]) => {
         if ( v ) obj[k] = v;
         else obj[`-=${k}`] = null;
         return obj;
@@ -67054,7 +67067,7 @@ class JournalEntrySheet5e extends foundry.applications.sheets.journal.JournalEnt
    * @internal
    */
   static async _injectNavigation(entry, html) {
-    const nav = entry.getFlag("dnd5e", "navigation");
+    const nav = entry.getFlag("charliednd5e", "navigation");
     if ( !nav ) return;
     const getDocument = id => entry.pack ? entry.collection.getDocument(id) : entry.collection.get(id);
     const previous = nav.previous ? await getDocument(nav.previous) : null;
@@ -67658,7 +67671,7 @@ class TableOfContentsCompendium extends foundry.applications.sidebar.apps.Compen
     context.chapters = [];
     const specialEntries = [];
     for ( const entry of documents ) {
-      const flags = entry.flags?.dnd5e;
+      const flags = entry.flags?.charliednd5e;
       if ( !flags ) continue;
       const keys = Object.keys(flags);
       if ( flags.tocHidden || !keys.length || ((keys.length === 1) && (keys[0] === "navigation")) ) continue;
@@ -67679,7 +67692,7 @@ class TableOfContentsCompendium extends foundry.applications.sidebar.apps.Compen
         name: flags.title ?? entry.name,
         pages: Array.from(entry.pages).map(({ flags, id, name, sort }) => ({
           id, sort, flags,
-          name: flags.dnd5e?.title ?? name,
+          name: flags.charliednd5e?.title ?? name,
           entryId: entry.id
         }))
       };
@@ -68430,7 +68443,7 @@ class BasicRoll extends Roll {
     }
 
     // Store the roll type in roll.options so it can be accessed from only the roll
-    const rollType = foundry.utils.getProperty(message, "data.flags.dnd5e.roll.type");
+    const rollType = foundry.utils.getProperty(message, "data.flags.charliednd5e.roll.type");
     if ( rollType ) rolls.forEach(roll => roll.options.rollType ??= rollType);
 
     /**
@@ -68480,7 +68493,7 @@ class BasicRoll extends Roll {
   static async buildPost(rolls, config, message) {
     message.data = foundry.utils.expandObject(message.data ?? {});
     const messageId = config.event?.target.closest("[data-message-id]")?.dataset.messageId;
-    if ( messageId ) foundry.utils.setProperty(message.data, "flags.dnd5e.originatingMessage", messageId);
+    if ( messageId ) foundry.utils.setProperty(message.data, "flags.charliednd5e.originatingMessage", messageId);
 
     if ( rolls?.length && (config.evaluate !== false) ) {
       message[message.create !== false ? "document" : "data"] = await this.toMessage(
@@ -68838,8 +68851,8 @@ class DamageRoll extends BasicRoll {
   /** @inheritDoc */
   static async build(config={}, dialog={}, message={}) {
     config.critical ??= {};
-    config.critical.multiplyNumeric ??= game.settings.get("dnd5e", "criticalDamageModifiers");
-    config.critical.powerfulCritical ??= game.settings.get("dnd5e", "criticalDamageMaxDice");
+    config.critical.multiplyNumeric ??= game.settings.get("charliednd5e", "criticalDamageModifiers");
+    config.critical.powerfulCritical ??= game.settings.get("charliednd5e", "criticalDamageMaxDice");
     return super.build(config, dialog, message);
   }
 
@@ -69019,7 +69032,7 @@ class DamageRoll extends BasicRoll {
   }
 }
 
-class ChatMessage5e extends ChatMessage {
+class ChatMessage5e extends SystemFlagsMixin(ChatMessage) {
 
   /**
    * HTML tag names for chat trays that can open and close.
@@ -69044,7 +69057,7 @@ class ChatMessage5e extends ChatMessage {
    * @type {boolean}
    */
   get canApplyDamage() {
-    const type = this.flags.dnd5e?.roll?.type;
+    const type = this.flags.charliednd5e?.roll?.type;
     if ( type && (type !== "damage") ) return false;
     return this.isRoll && this.isContentVisible && !!canvas.tokens?.controlled.length;
   }
@@ -69056,7 +69069,7 @@ class ChatMessage5e extends ChatMessage {
    * @type {boolean}
    */
   get canSelectTargets() {
-    if ( this.flags.dnd5e?.roll?.type !== "attack" ) return false;
+    if ( this.flags.charliednd5e?.roll?.type !== "attack" ) return false;
     return this.isRoll && this.isContentVisible;
   }
 
@@ -69065,7 +69078,7 @@ class ChatMessage5e extends ChatMessage {
   /** @inheritDoc */
   get isRoll() {
     if ( this.system?.isRoll !== undefined ) return this.system.isRoll;
-    return super.isRoll && !this.flags.dnd5e?.rest;
+    return super.isRoll && !this.flags.charliednd5e?.rest;
   }
 
   /* -------------------------------------------- */
@@ -69076,7 +69089,7 @@ class ChatMessage5e extends ChatMessage {
    */
   get shouldDisplayChallenge() {
     if ( game.user.isGM || (this.author === game.user) ) return true;
-    switch ( game.settings.get("dnd5e", "challengeVisibility") ) {
+    switch ( game.settings.get("charliednd5e", "challengeVisibility") ) {
       case "all": return true;
       case "player": return !this.author?.isGM;
       default: return false;
@@ -69099,16 +69112,16 @@ class ChatMessage5e extends ChatMessage {
   /** @inheritDoc */
   static migrateData(source) {
     source = super.migrateData(source);
-    if ( foundry.utils.hasProperty(source, "flags.dnd5e.itemData") ) {
-      foundry.utils.setProperty(source, "flags.dnd5e.item.data", source.flags.dnd5e.itemData);
-      delete source.flags.dnd5e.itemData;
+    if ( foundry.utils.hasProperty(source, "flags.charliednd5e.itemData") ) {
+      foundry.utils.setProperty(source, "flags.charliednd5e.item.data", source.flags.charliednd5e.itemData);
+      delete source.flags.charliednd5e.itemData;
     }
-    if ( foundry.utils.hasProperty(source, "flags.dnd5e.use") ) {
-      const use = source.flags.dnd5e.use;
-      if ( source.type !== "usage" ) foundry.utils.setProperty(source, "flags.dnd5e.messageType", "usage");
-      if ( use.type ) foundry.utils.setProperty(source, "flags.dnd5e.item.type", use.type);
-      if ( use.itemId ) foundry.utils.setProperty(source, "flags.dnd5e.item.id", use.itemId);
-      if ( use.itemUuid ) foundry.utils.setProperty(source, "flags.dnd5e.item.uuid", use.itemUuid);
+    if ( foundry.utils.hasProperty(source, "flags.charliednd5e.use") ) {
+      const use = source.flags.charliednd5e.use;
+      if ( source.type !== "usage" ) foundry.utils.setProperty(source, "flags.charliednd5e.messageType", "usage");
+      if ( use.type ) foundry.utils.setProperty(source, "flags.charliednd5e.item.type", use.type);
+      if ( use.itemId ) foundry.utils.setProperty(source, "flags.charliednd5e.item.id", use.itemId);
+      if ( use.itemUuid ) foundry.utils.setProperty(source, "flags.charliednd5e.item.uuid", use.itemUuid);
     }
     return source;
   }
@@ -69120,9 +69133,9 @@ class ChatMessage5e extends ChatMessage {
   /** @inheritDoc */
   prepareData() {
     super.prepareData();
-    if ( !this.flags.dnd5e?.item?.data && this.flags.dnd5e?.item?.id ) {
-      const itemData = this.system.deltas?.deleted?.find(i => i._id === this.flags.dnd5e.item.id);
-      if ( itemData ) Object.defineProperty(this.flags.dnd5e.item, "data", { value: itemData });
+    if ( !this.flags.charliednd5e?.item?.data && this.flags.charliednd5e?.item?.id ) {
+      const itemData = this.system.deltas?.deleted?.find(i => i._id === this.flags.charliednd5e.item.id);
+      if ( itemData ) Object.defineProperty(this.flags.charliednd5e.item, "data", { value: itemData });
     }
     dnd5e.registry.messages.track(this);
   }
@@ -69140,7 +69153,7 @@ class ChatMessage5e extends ChatMessage {
     } else {
       this._displayChatActionButtons(html);
       this._highlightCriticalSuccessFailure(html);
-      if ( game.settings.get("dnd5e", "autoCollapseItemCards") ) {
+      if ( game.settings.get("charliednd5e", "autoCollapseItemCards") ) {
         html.querySelectorAll(".description.collapsible").forEach(el => el.classList.add("collapsed"));
       }
 
@@ -69169,7 +69182,7 @@ class ChatMessage5e extends ChatMessage {
    */
   _collapseTrays(html) {
     let collapse;
-    switch ( game.settings.get("dnd5e", "autoCollapseChatTrays") ) {
+    switch ( game.settings.get("charliednd5e", "autoCollapseChatTrays") ) {
       case "always": collapse = true; break;
       case "never":
       case "manual": collapse = false; break;
@@ -69222,8 +69235,8 @@ class ChatMessage5e extends ChatMessage {
     if ( !this.isContentVisible || !this.rolls.length ) return;
     const originatingMessage = this.getOriginatingMessage();
     const displayChallenge = originatingMessage?.shouldDisplayChallenge;
-    const displayAttackResult = game.user.isGM || (game.settings.get("dnd5e", "attackRollVisibility") !== "none");
-    const forceSuccess = this.flags.dnd5e?.roll?.forceSuccess === true;
+    const displayAttackResult = game.user.isGM || (game.settings.get("charliednd5e", "attackRollVisibility") !== "none");
+    const forceSuccess = this.flags.charliednd5e?.roll?.forceSuccess === true;
 
     /**
      * Create an icon to indicate success or failure.
@@ -69254,8 +69267,8 @@ class ChatMessage5e extends ChatMessage {
       const total = totals[index];
       if ( !total ) continue;
       // Only attack rolls and death saves can crit or fumble.
-      const canCrit = ["attack", "death"].includes(this.getFlag("dnd5e", "roll.type"));
-      const isAttack = this.getFlag("dnd5e", "roll.type") === "attack";
+      const canCrit = ["attack", "death"].includes(this.getFlag("charliednd5e", "roll.type"));
+      const isAttack = this.getFlag("charliednd5e", "roll.type") === "attack";
       const showResult = isAttack ? displayAttackResult : displayChallenge;
       if ( d.options.target && showResult ) {
         if ( d20Roll.isSuccess || forceSuccess ) total.classList.add("success");
@@ -69354,7 +69367,7 @@ class ChatMessage5e extends ChatMessage {
     });
 
     // Enriched roll flavor
-    const roll = this.getFlag("dnd5e", "roll");
+    const roll = this.getFlag("charliednd5e", "roll");
     const item = this.getAssociatedItem();
     const activity = this.getAssociatedActivity();
     if ( this.isContentVisible && item && roll ) {
@@ -69456,11 +69469,11 @@ class ChatMessage5e extends ChatMessage {
       (html.querySelector(".chat-card") ?? html.querySelector(".message-content"))?.appendChild(p);
     }
 
-    const visibility = game.settings.get("dnd5e", "attackRollVisibility");
+    const visibility = game.settings.get("charliednd5e", "attackRollVisibility");
     const isVisible = game.user.isGM || (visibility !== "none");
     if ( !isVisible ) return;
 
-    const targets = this.getFlag("dnd5e", "targets");
+    const targets = this.getFlag("charliednd5e", "targets");
     if ( !targets?.length ) return;
     const tray = document.createElement("div");
     tray.innerHTML = `
@@ -69568,7 +69581,7 @@ class ChatMessage5e extends ChatMessage {
     `;
     html.querySelector(".message-content").appendChild(roll);
 
-    const damageOnSave = this.getFlag("dnd5e", "roll.damageOnSave");
+    const damageOnSave = this.getFlag("charliednd5e", "roll.damageOnSave");
     if ( damageOnSave ) {
       const p = document.createElement("p");
       p.classList.add("supplement");
@@ -69653,7 +69666,7 @@ class ChatMessage5e extends ChatMessage {
    */
   _enrichSaveTooltip(html) {
     const actor = this.getAssociatedActor();
-    const roll = this.getFlag("dnd5e", "roll");
+    const roll = this.getFlag("charliednd5e", "roll");
     if ( !actor?.system.isNPC || (roll?.type !== "save") || this.rolls.some(r => r.isSuccess) ) return;
 
     const content = document.createElement("div");
@@ -69909,7 +69922,7 @@ class ChatMessage5e extends ChatMessage {
       const notifications = document.getElementById("chat-notifications");
       if ( notifications ) notifications.dataset.gmUser = "";
     }
-    if ( !game.settings.get("dnd5e", "autoCollapseItemCards") ) {
+    if ( !game.settings.get("charliednd5e", "autoCollapseItemCards") ) {
       requestAnimationFrame(() => {
         // FIXME: Allow time for transitions to complete. Adding a transitionend listener does not appear to work, so
         // the transition time is hard-coded for now.
@@ -69975,9 +69988,9 @@ class ChatMessage5e extends ChatMessage {
    * @returns {Activity|void}
    */
   getAssociatedActivity() {
-    const activity = fromUuidSync(this.getFlag("dnd5e", "activity.uuid"), { strict: false });
+    const activity = fromUuidSync(this.getFlag("charliednd5e", "activity.uuid"), { strict: false });
     if ( activity ) return activity;
-    return this.getAssociatedItem()?.system.activities?.get(this.getFlag("dnd5e", "activity.id"));
+    return this.getAssociatedItem()?.system.activities?.get(this.getFlag("charliednd5e", "activity.id"));
   }
 
   /* -------------------------------------------- */
@@ -70002,11 +70015,11 @@ class ChatMessage5e extends ChatMessage {
    * @returns {Item5e|void}
    */
   getAssociatedItem() {
-    const item = fromUuidSync(this.getFlag("dnd5e", "item.uuid"), { strict: false });
+    const item = fromUuidSync(this.getFlag("charliednd5e", "item.uuid"), { strict: false });
     if ( item ) return item;
     const actor = this.getAssociatedActor();
     if ( !actor ) return;
-    const storedData = this.getFlag("dnd5e", "item.data") ?? this.getOriginatingMessage().getFlag("dnd5e", "item.data");
+    const storedData = this.getFlag("charliednd5e", "item.data") ?? this.getOriginatingMessage().getFlag("charliednd5e", "item.data");
     if ( storedData ) return new Item.implementation(storedData, { parent: actor });
   }
 
@@ -70029,7 +70042,7 @@ class ChatMessage5e extends ChatMessage {
    * @type {ChatMessage5e}
    */
   getOriginatingMessage() {
-    return game.messages.get(this.getFlag("dnd5e", "originatingMessage")) ?? this;
+    return game.messages.get(this.getFlag("charliednd5e", "originatingMessage")) ?? this;
   }
 }
 
@@ -70203,9 +70216,9 @@ class SheetConfig5e extends foundry.applications.apps.DocumentSheetConfig {
     delete formData.defaultClass;
     this.object.update(formData);
 
-    if ( "flags.dnd5e.theme" in formData ) {
+    if ( "flags.charliednd5e.theme" in formData ) {
       const sheet = this.object.sheet.element?.[0];
-      if ( sheet ) setTheme(sheet, formData["flags.dnd5e.theme"]);
+      if ( sheet ) setTheme(sheet, formData["flags.charliednd5e.theme"]);
     }
   }
 }
@@ -70439,7 +70452,7 @@ class TokenLayer5e extends foundry.canvas.layers.TokenLayer {
   isOccupiedGridSpaceBlocking(gridSpace, token, { preview=false }={}) {
     const tokenSize = CONFIG.DND5E.actorSizes[token.actor?.system.traits.size]?.numerical ?? 2;
     const modernRules = dnd5e.settings.rulesVersion === "modern";
-    const halflingNimbleness = token.actor?.getFlag("dnd5e", "halflingNimbleness");
+    const halflingNimbleness = token.actor?.getFlag("charliednd5e", "halflingNimbleness");
     const found = this.#getRelevantOccupyingTokens(gridSpace, token, { preview }).filter(t => {
       // Only creatures block movement.
       if ( !t.actor?.system.isCreature ) return false;
@@ -70613,7 +70626,7 @@ class Token5e extends foundry.canvas.placeables.Token {
   findMovementPath(waypoints, options) {
 
     // Normal behavior if token blocking is disabled or this actor is not a creature or cannot block
-    if ( (game.settings.get("dnd5e", "movementAutomation") !== "full") || !this.document.actor?.system.isCreature
+    if ( (game.settings.get("charliednd5e", "movementAutomation") !== "full") || !this.document.actor?.system.isCreature
       || this.document.actor.statuses.intersects(CONFIG.DND5E.neverBlockStatuses) ) {
       return super.findMovementPath(waypoints, options);
     }
@@ -70643,7 +70656,7 @@ class Token5e extends foundry.canvas.placeables.Token {
   /** @inheritDoc */
   _getMovementCostFunction(options) {
     const costFunction = super._getMovementCostFunction(options);
-    if ( game.settings.get("dnd5e", "movementAutomation") === "none" ) return costFunction;
+    if ( game.settings.get("charliednd5e", "movementAutomation") === "none" ) return costFunction;
 
     const ignoredDifficultTerrain = this.actor?.system.attributes?.movement?.ignoredDifficultTerrain ?? new Set();
     const ignoreDifficult = ["all", "nonmagical"].some(i => ignoredDifficultTerrain.has(i));
@@ -70671,7 +70684,7 @@ class Token5e extends foundry.canvas.placeables.Token {
   constrainMovementPath(waypoints, options) {
     let { preview=false, ignoreTokens=false } = options; // Custom constrain option to ignore tokens
 
-    ignoreTokens ||= game.settings.get("dnd5e", "movementAutomation") !== "full";
+    ignoreTokens ||= game.settings.get("charliednd5e", "movementAutomation") !== "full";
     ignoreTokens ||= !this.actor?.system.isCreature;
     ignoreTokens ||= this.actor?.statuses?.intersects(CONFIG.DND5E.neverBlockStatuses);
 
@@ -71781,7 +71794,7 @@ class CreatureTemplate extends CommonTemplate {
    *                                             If undefined, `this.getRollData()` is used.
    * @param {object} [options.originalSkills]    Original skills if actor is polymorphed.
    *                                             If undefined, the skills of the actor identified by
-   *                                             `this.flags.dnd5e.originalActor` are used.
+   *                                             `this.flags.charliednd5e.originalActor` are used.
    * @param {object} [options.globalBonuses]     Global ability bonuses for this actor.
    *                                             If undefined, `this.system.bonuses.abilities` is used.
    * @param {number} [options.globalCheckBonus]  Global check bonus for this actor.
@@ -71796,7 +71809,7 @@ class CreatureTemplate extends CommonTemplate {
     skillData, rollData, originalSkills, globalBonuses,
     globalCheckBonus, globalSkillBonus, ability
   }={}) {
-    const flags = this.parent.flags.dnd5e ?? {};
+    const flags = this.parent.flags.charliednd5e ?? {};
 
     skillData ??= foundry.utils.deepClone(this.skills[skillId]);
     rollData ??= this.parent.getRollData();
@@ -72071,7 +72084,7 @@ class CharacterData extends CreatureTemplate {
       const required = xp.max - xp.min;
       const pct = Math.round((xp.value - xp.min) * 100 / required);
       xp.pct = Math.clamp(pct, 0, 100);
-    } else if ( game.settings.get("dnd5e", "levelingMode") === "xpBoons" ) {
+    } else if ( game.settings.get("charliednd5e", "levelingMode") === "xpBoons" ) {
       const overflow = xp.value - this.parent.getLevelExp(CONFIG.DND5E.maxLevel);
       xp.boonsEarned = Math.max(0, Math.floor(overflow / CONFIG.DND5E.epicBoonInterval));
       const progress = overflow - (CONFIG.DND5E.epicBoonInterval * xp.boonsEarned);
@@ -72944,7 +72957,7 @@ class GroupData extends GroupTemplate {
      */
     Hooks.callAll("dnd5e.groupRestCompleted", this.parent, results);
 
-    if ( config.advanceBastionTurn && game.user.isGM && game.settings.get("dnd5e", "bastionConfiguration").enabled ) {
+    if ( config.advanceBastionTurn && game.user.isGM && game.settings.get("charliednd5e", "bastionConfiguration").enabled ) {
       await dnd5e.bastion.advanceAllBastions();
     }
 
@@ -73506,10 +73519,10 @@ class NPCData extends CreatureTemplate {
    */
   async resistSave(message) {
     if ( this.resources.legres.value === 0 ) throw new Error("No legendary resistances remaining.");
-    if ( message.flags.dnd5e?.roll?.type !== "save" ) throw new Error("Chat message must contain a save roll.");
-    if ( message.flags.dnd5e?.roll?.forceSuccess ) throw new Error("Save has already been resisted.");
+    if ( message.flags.charliednd5e?.roll?.type !== "save" ) throw new Error("Chat message must contain a save roll.");
+    if ( message.flags.charliednd5e?.roll?.forceSuccess ) throw new Error("Save has already been resisted.");
     await this.parent.update({ "system.resources.legres.spent": this.resources.legres.spent + 1 });
-    await message.setFlag("dnd5e", "roll.forceSuccess", true);
+    await message.setFlag("charliednd5e", "roll.forceSuccess", true);
   }
 
   /* -------------------------------------------- */
@@ -73563,7 +73576,7 @@ class NPCData extends CreatureTemplate {
       ...Array.from(value).map(t => keyLabel(t, { trait: trait$1 })).filter(_ => _),
       ...splitSemicolons(custom ?? "")
     ].sort((lhs, rhs) => lhs.localeCompare(rhs, game.i18n.lang)));
-    const o = this.parent.flags.dnd5e?.statBlockOverride ?? {};
+    const o = this.parent.flags.charliednd5e?.statBlockOverride ?? {};
 
     const prepareSpeed = () => {
       const standard = formatter.format([
@@ -74349,8 +74362,8 @@ class RequestMessageData extends ChatMessageDataModel {
   static async #handleRequest(event, target) {
     const actor = fromUuidSync(target.closest("[data-uuid]").dataset.uuid);
     const result = await CONFIG.DND5E.requests[this.handler](actor, this.parent, this.data, { event });
-    if ( (result instanceof ChatMessage) && !result.getFlag("dnd5e", "requestResult") ) {
-      return result.setFlag("dnd5e", "requestResult", { actorUuid: actor.uuid, requestId: this.parent.id });
+    if ( (result instanceof ChatMessage) && !result.getFlag("charliednd5e", "requestResult") ) {
+      return result.setFlag("charliednd5e", "requestResult", { actorUuid: actor.uuid, requestId: this.parent.id });
     }
   }
 
@@ -74361,7 +74374,7 @@ class RequestMessageData extends ChatMessageDataModel {
    * @param {ChatMessage5e} message  The created chat message.
    */
   static onCreateMessage(message) {
-    const flag = message.getFlag("dnd5e", "requestResult");
+    const flag = message.getFlag("charliednd5e", "requestResult");
     if ( flag && (game.users.activeGM === game.user) ) RequestMessageData.#updateRequestTargets(message, flag);
   }
 
@@ -74375,7 +74388,7 @@ class RequestMessageData extends ChatMessageDataModel {
    * @param {string} userId
    */
   static onUpdateResultMessage(message, changes, options, userId) {
-    const flag = foundry.utils.getProperty(changes, "flags.dnd5e.requestResult");
+    const flag = foundry.utils.getProperty(changes, "flags.charliednd5e.requestResult");
     if ( flag && (game.users.activeGM === game.user) ) RequestMessageData.#updateRequestTargets(message, flag);
   }
 
@@ -74666,7 +74679,7 @@ class UsageMessageData extends ChatMessageDataModel {
     super._onRender(element);
     this.activity?.onRenderChatCard(this.parent, element);
     this._displayChatActionButtons(element);
-    if ( game.settings.get("dnd5e", "autoCollapseItemCards") ) {
+    if ( game.settings.get("charliednd5e", "autoCollapseItemCards") ) {
       element.querySelectorAll(".description.collapsible").forEach(el => el.classList.add("collapsed"));
     }
     this.activity?.activateChatListeners(this.parent, element);
@@ -74730,7 +74743,7 @@ class Actors5e extends foundry.documents.collections.Actors {
    * @type {Actor5e|null}
    */
   get party() {
-    return game.settings.get("dnd5e", "primaryParty")?.actor ?? null;
+    return game.settings.get("charliednd5e", "primaryParty")?.actor ?? null;
   }
 }
 
@@ -74996,7 +75009,7 @@ class ConsumableData extends ItemDataModel$1.mixin(
    * @returns {number}
    */
   get proficiencyMultiplier() {
-    const isProficient = this.parent?.actor?.getFlag("dnd5e", "tavernBrawlerFeat");
+    const isProficient = this.parent?.actor?.getFlag("charliednd5e", "tavernBrawlerFeat");
     return isProficient ? 1 : 0;
   }
 
@@ -75157,7 +75170,7 @@ class ConsumableData extends ItemDataModel$1.mixin(
   /** @inheritDoc */
   getRollData(...options) {
     const data = super.getRollData(...options);
-    const spellLevel = this.parent.getFlag("dnd5e", "spellLevel");
+    const spellLevel = this.parent.getFlag("charliednd5e", "spellLevel");
     if ( spellLevel ) data.item.level = spellLevel.value ?? spellLevel.base;
     return data;
   }
@@ -76696,7 +76709,7 @@ class WeaponData extends ItemDataModel$1.mixin(
       });
     }
 
-    const isLight = this.properties.has("lgt") || (this.parent.actor?.getFlag("dnd5e", "enhancedDualWielding")
+    const isLight = this.properties.has("lgt") || (this.parent.actor?.getFlag("charliednd5e", "enhancedDualWielding")
       && ((this.attackType === "melee") && !this.properties.has("two")));
 
     // Weapons with the "Light" property will have Offhand attack
@@ -76788,7 +76801,7 @@ class WeaponData extends ItemDataModel$1.mixin(
 
   /** @override */
   get criticalThreshold() {
-    return this.parent?.actor?.flags.dnd5e?.weaponCriticalThreshold ?? Infinity;
+    return this.parent?.actor?.flags.charliednd5e?.weaponCriticalThreshold ?? Infinity;
   }
 
   /* -------------------------------------------- */
@@ -76877,7 +76890,7 @@ class WeaponData extends ItemDataModel$1.mixin(
     const itemProf = config[this.type.value];
     const actorProfs = actor.system.traits?.weaponProf?.value ?? new Set();
     const natural = this.type.value === "natural";
-    const improvised = (this.type.value === "improv") && !!actor.getFlag("dnd5e", "tavernBrawlerFeat");
+    const improvised = (this.type.value === "improv") && !!actor.getFlag("charliednd5e", "tavernBrawlerFeat");
     const isProficient = natural || improvised || actorProfs.has(itemProf) || actorProfs.has(this.type.baseItem);
     return Number(isProficient);
   }
@@ -77230,7 +77243,7 @@ class MapLocationJournalPageData extends foundry.abstract.TypeDataModel {
     if ( !this.code ) return;
     const { icon: IconClass, ...style } = foundry.utils.mergeObject(
       CONFIG.DND5E.mapLocationMarker.default,
-      CONFIG.DND5E.mapLocationMarker[this.parent.getFlag("dnd5e", "mapMarkerStyle")] ?? {},
+      CONFIG.DND5E.mapLocationMarker[this.parent.getFlag("charliednd5e", "mapMarkerStyle")] ?? {},
       {inplace: false}
     );
     return new IconClass({code: this.code, ...options, ...style});
@@ -78560,7 +78573,7 @@ class TerrainData5e extends foundry.data.TerrainData {
 
   /** @override */
   static resolveTerrainEffects(effects) {
-    const noAutomation = game.settings.get("dnd5e", "movementAutomation") === "none";
+    const noAutomation = game.settings.get("charliednd5e", "movementAutomation") === "none";
     let data = super.resolveTerrainEffects(effects);
     if ( noAutomation || !effects.some(e => e.name === "difficultTerrain") ) return data;
     if ( !data ) return new this({ difficulty: 2, difficultTerrain: true });
@@ -79574,7 +79587,7 @@ class TokenDocument5e extends SystemFlagsMixin(TokenDocument) {
       actionConfig.getCostFunction = (...args) => this.getMovementActionCostFunction(type, ...args);
     }
     CONFIG.Token.movement.actions.crawl.getCostFunction = token => {
-      const noAutomation = game.settings.get("dnd5e", "movementAutomation") === "none";
+      const noAutomation = game.settings.get("charliednd5e", "movementAutomation") === "none";
       const { actor } = token;
       const actorMovement = actor?.system.attributes?.movement;
       const hasMovement = actorMovement !== undefined;
@@ -79596,7 +79609,7 @@ class TokenDocument5e extends SystemFlagsMixin(TokenDocument) {
    * @returns {TokenMovementActionCostFunction}
    */
   static getMovementActionCostFunction(type, token, options) {
-    const noAutomation = game.settings.get("dnd5e", "movementAutomation") === "none";
+    const noAutomation = game.settings.get("charliednd5e", "movementAutomation") === "none";
     const { actor } = token;
     const actorMovement = actor?.system.attributes?.movement;
     const walkFallback = CONFIG.DND5E.movementTypes[type]?.walkFallback;
@@ -79665,7 +79678,7 @@ class TokenDocument5e extends SystemFlagsMixin(TokenDocument) {
 
     if ( this.actor?.system.isNPC && !this.actorLink
       && foundry.utils.getProperty(this.actor, "system.attributes.hp.formula")?.trim().length ) {
-      const autoRoll = options.dnd5e?.autoRollNPCHP ?? game.settings.get("dnd5e", "autoRollNPCHP");
+      const autoRoll = options.dnd5e?.autoRollNPCHP ?? game.settings.get("charliednd5e", "autoRollNPCHP");
       if ( autoRoll === "no" ) return;
       const roll = await this.actor.rollNPCHitPoints({ chatMessage: autoRoll === "yes" });
       const update = {
@@ -79687,7 +79700,7 @@ class TokenDocument5e extends SystemFlagsMixin(TokenDocument) {
   _onDelete(options, userId) {
     super._onDelete(options, userId);
 
-    const origin = this.actor?.getFlag("dnd5e", "summon.origin");
+    const origin = this.actor?.getFlag("charliednd5e", "summon.origin");
     if ( origin ) {
       const { collection, primaryId } = foundry.utils.parseUuid(origin);
       dnd5e.registry.summons.untrack(collection?.get?.(primaryId)?.uuid, this.actor.uuid);
@@ -79725,7 +79738,7 @@ class Bastion {
    */
   async advanceAllBastions() {
     // TODO: Should this advance game.time?
-    const { duration } = game.settings.get("dnd5e", "bastionConfiguration");
+    const { duration } = game.settings.get("charliednd5e", "bastionConfiguration");
     const haveBastions = game.actors.filter(a => a.system.isCharacter && a.itemTypes.facility.length);
     for ( const actor of haveBastions ) await this.advanceAllFacilities(actor, { duration });
   }
@@ -79970,7 +79983,7 @@ class Bastion {
    */
   initializeUI() {
     const turnButton = document.getElementById("bastion-turn");
-    const { button, enabled } = game.settings.get("dnd5e", "bastionConfiguration");
+    const { button, enabled } = game.settings.get("charliednd5e", "bastionConfiguration");
 
     if ( !enabled || !button || !game.user.isGM) {
       turnButton?.remove();
@@ -80242,7 +80255,7 @@ async function migrateWorld({ bypassVersionCheck=false }={}) {
   if ( legacyFolder ) legacyFolder.update({ name: "D&D Legacy Content" });
 
   // Set the migration as complete
-  game.settings.set("dnd5e", "systemMigrationVersion", game.system.version);
+  game.settings.set("charliednd5e", "systemMigrationVersion", game.system.version);
   progress.element?.classList.add(hasErrors ? "warning" : "success");
   progress.update({ message: "MIGRATION.5eComplete", format: { version }, pct: 1 });
 }
@@ -80492,12 +80505,24 @@ async function migrateArmorClass(pack) {
  * Migrate system settings to new data types.
  */
 async function migrateSettings() {
+  for ( const scope of ["world", "client"] ) {
+    const storage = game.settings.storage.get(scope) ?? [];
+    for ( const stored of [...storage] ) {
+      if ( !stored.key.startsWith("dnd5e.") ) continue;
+      const key = stored.key.slice("dnd5e.".length);
+      if ( key === "systemMigrationVersion" ) continue;
+      const targetKey = `charliednd5e.${key}`;
+      if ( !game.settings.settings.has(targetKey) || storage.find(s => s.key === targetKey) ) continue;
+      await game.settings.set("charliednd5e", key, stored.value);
+    }
+  }
+
   // Migrate Disable Experience Tracking to Leveling Mode
   const disableExperienceTracking = game.settings.storage.get("world")
     ?.find(s => s.key === "dnd5e.disableExperienceTracking")?.value;
   const levelingMode = game.settings.storage.get("world")?.find(s => s.key === "dnd5e.levelingMode")?.value;
   if ( (disableExperienceTracking !== undefined) && (levelingMode === undefined) ) {
-    await game.settings.set("dnd5e", "levelingMode", "noxp");
+    await game.settings.set("charliednd5e", "levelingMode", "noxp");
   }
   // Migrate Disable Movement Automation to Movement Automation
   const disableMovementAutomation = game.settings.storage.get("world")
@@ -80505,7 +80530,7 @@ async function migrateSettings() {
   const movementAutomation = game.settings.storage.get("world")
     ?.find(s => s.key === "dnd5e.movementAutomation")?.value;
   if ( (disableMovementAutomation !== undefined) && (movementAutomation === undefined) ) {
-    await game.settings.set("dnd5e", "movementAutomation", disableMovementAutomation ? "none" : "full");
+    await game.settings.set("charliednd5e", "movementAutomation", disableMovementAutomation ? "none" : "full");
   }
 }
 
@@ -80617,11 +80642,11 @@ function migrateItemData(item, itemData, migrationData, flags={}) {
 
   // Migrate embedded effects
   if ( itemData.effects ) {
-    const riders = foundry.utils.getProperty(itemData, "flags.dnd5e.riders.effect");
-    if ( riders?.length ) updateData["flags.dnd5e.riders.effect"] = riders;
+    const riders = foundry.utils.getProperty(itemData, "flags.charliednd5e.riders.effect");
+    if ( riders?.length ) updateData["flags.charliednd5e.riders.effect"] = riders;
     const effects = migrateEffects(itemData, migrationData, updateData, flags);
-    if ( riders?.length === updateData["flags.dnd5e.riders.effect"]?.length ) {
-      delete updateData["flags.dnd5e.riders.effect"];
+    if ( riders?.length === updateData["flags.charliednd5e.riders.effect"]?.length ) {
+      delete updateData["flags.charliednd5e.riders.effect"];
     }
     if ( effects.length > 0 ) updateData.effects = effects;
   }
@@ -80641,13 +80666,13 @@ function migrateItemData(item, itemData, migrationData, flags={}) {
   }
 
   // Migrate properties
-  const migratedProperties = foundry.utils.getProperty(itemData, "flags.dnd5e.migratedProperties");
+  const migratedProperties = foundry.utils.getProperty(itemData, "flags.charliednd5e.migratedProperties");
   if ( migratedProperties?.length ) {
     flags.persistSourceMigration = true;
     const properties = new Set(foundry.utils.getProperty(itemData, "system.properties") ?? [])
       .union(new Set(migratedProperties));
     updateData["system.properties"] = Array.from(properties);
-    updateData["flags.dnd5e.-=migratedProperties"] = null;
+    updateData["flags.charliednd5e.-=migratedProperties"] = null;
   }
 
   // Migrate gear property
@@ -80666,13 +80691,13 @@ function migrateItemData(item, itemData, migrationData, flags={}) {
   if ( (itemData.type === "spell") && !itemData.system?.sourceItem && flags.actorData?.items ) {
     // Try to identify the granting item from advancement or cast-activity flags.
     let grantingItemData;
-    const advancementOrigin = item.getFlag("dnd5e", "advancementOrigin");
+    const advancementOrigin = item.getFlag("charliednd5e", "advancementOrigin");
     if ( advancementOrigin ) {
       const [itemId] = advancementOrigin.split(".");
       grantingItemData = flags.actorData.items.find(i => i._id === itemId);
     }
     if ( !grantingItemData ) {
-      const cachedFor = item.getFlag("dnd5e", "cachedFor");
+      const cachedFor = item.getFlag("charliednd5e", "cachedFor");
       if ( cachedFor ) {
         const { embedded } = foundry.utils.parseUuid(cachedFor, { relative: item.parent }) ?? {};
         const [, itemId] = embedded ?? [];
@@ -80685,9 +80710,9 @@ function migrateItemData(item, itemData, migrationData, flags={}) {
     }
   }
 
-  if ( foundry.utils.getProperty(itemData, "flags.dnd5e.persistSourceMigration") ) {
+  if ( foundry.utils.getProperty(itemData, "flags.charliednd5e.persistSourceMigration") ) {
     flags.persistSourceMigration = true;
-    updateData["flags.dnd5e.-=persistSourceMigration"] = null;
+    updateData["flags.charliednd5e.-=persistSourceMigration"] = null;
   }
 
   return updateData;
@@ -80708,14 +80733,14 @@ function migrateEffects(parent, migrationData, itemUpdateData, flags={}) {
   return parent.effects.reduce((arr, e) => {
     const effectData = e instanceof CONFIG.ActiveEffect.documentClass ? e.toObject() : e;
     let effectUpdate = migrateEffectData(effectData, migrationData, { parent });
-    if ( effectData.flags?.dnd5e?.rider ) {
-      itemUpdateData["flags.dnd5e.riders.effect"] ??= [];
-      itemUpdateData["flags.dnd5e.riders.effect"].push(effectData._id);
-      effectUpdate["flags.dnd5e.-=rider"] = null;
+    if ( effectData.flags?.charliednd5e?.rider ) {
+      itemUpdateData["flags.charliednd5e.riders.effect"] ??= [];
+      itemUpdateData["flags.charliednd5e.riders.effect"].push(effectData._id);
+      effectUpdate["flags.charliednd5e.-=rider"] = null;
     }
-    if ( effectData.flags?.dnd5e?.persistSourceMigration ) {
+    if ( effectData.flags?.charliednd5e?.persistSourceMigration ) {
       flags.persistSourceMigration = true;
-      effectUpdate["flags.dnd5e.-=persistSourceMigration"] = null;
+      effectUpdate["flags.charliednd5e.-=persistSourceMigration"] = null;
     }
     if ( !foundry.utils.isEmpty(effectUpdate) ) {
       effectUpdate._id = effectData._id;
@@ -80798,8 +80823,8 @@ function migrateMessageData(messageData) {
   const updateData = {};
   const { flags } = messageData;
 
-  if ( (flags?.dnd5e?.messageType === "usage") && (messageData.type !== "usage") ) {
-    const use = flags.dnd5e.use;
+  if ( (flags?.charliednd5e?.messageType === "usage") && (messageData.type !== "usage") ) {
+    const use = flags.charliednd5e.use;
     updateData.type = "usage";
     updateData["==system"] = {
       cause: use?.cause,
@@ -80809,20 +80834,20 @@ function migrateMessageData(messageData) {
       scaling: use?.scaling,
       spellLevel: use?.spellLevel
     };
-    updateData["flags.dnd5e.-=messageType"] = null;
-    updateData["flags.dnd5e.-=scaling"] = null;
-    updateData["flags.dnd5e.use.-=cause"] = null;
-    updateData["flags.dnd5e.use.-=concentrationId"] = null;
-    updateData["flags.dnd5e.use.-=consumed"] = null;
-    updateData["flags.dnd5e.use.-=effects"] = null;
-    updateData["flags.dnd5e.use.-=spellLevel"] = null;
+    updateData["flags.charliednd5e.-=messageType"] = null;
+    updateData["flags.charliednd5e.-=scaling"] = null;
+    updateData["flags.charliednd5e.use.-=cause"] = null;
+    updateData["flags.charliednd5e.use.-=concentrationId"] = null;
+    updateData["flags.charliednd5e.use.-=consumed"] = null;
+    updateData["flags.charliednd5e.use.-=effects"] = null;
+    updateData["flags.charliednd5e.use.-=spellLevel"] = null;
   }
 
-  else if ( flags?.dnd5e?.bastion && (messageData.type === "base") ) {
-    const bastion = flags.dnd5e.bastion;
+  else if ( flags?.charliednd5e?.bastion && (messageData.type === "base") ) {
+    const bastion = flags.charliednd5e.bastion;
     updateData.type = "orders" in bastion ? "bastionTurn" : "bastionAttack";
     updateData["==system"] = bastion;
-    updateData["flags.dnd5e.-=bastion"] = null;
+    updateData["flags.charliednd5e.-=bastion"] = null;
   }
 
   return updateData;
@@ -80970,11 +80995,11 @@ function _migrateActorAC(actorData, updateData) {
  * @private
  */
 function _migrateActorFlags(actorData, updateData) {
-  const initiativeAdv = foundry.utils.getProperty(actorData, "flags.dnd5e.initiativeAdv");
+  const initiativeAdv = foundry.utils.getProperty(actorData, "flags.charliednd5e.initiativeAdv");
   if ( initiativeAdv ) {
     const key = "system.attributes.init.roll.mode";
     updateData[key] = Math.min(1, (foundry.utils.getProperty(actorData, key) ?? 0) + 1);
-    updateData["flags.dnd5e.-=initiativeAdv"] = null;
+    updateData["flags.charliednd5e.-=initiativeAdv"] = null;
   }
   return updateData;
 }
@@ -81075,13 +81100,13 @@ function _migrateEffectArmorClass(effect, updateData) {
  * @param {object} flags       Track the needs migration flag.
  */
 function _migrateItemUses(item, itemData, updateData, flags) {
-  const value = foundry.utils.getProperty(itemData, "flags.dnd5e.migratedUses");
+  const value = foundry.utils.getProperty(itemData, "flags.charliednd5e.migratedUses");
   const max = foundry.utils.getProperty(item, "system.uses.max");
   if ( (value !== undefined) && (max !== undefined) && Number.isNumeric(value) && Number.isNumeric(max) ) {
     foundry.utils.setProperty(updateData, "system.uses.spent", parseInt(max) - parseInt(value));
     flags.persistSourceMigration = true;
   }
-  if ( value !== undefined ) updateData["flags.dnd5e.-=migratedUses"] = null;
+  if ( value !== undefined ) updateData["flags.charliednd5e.-=migratedUses"] = null;
 }
 
 /* -------------------------------------------- */
@@ -81132,8 +81157,8 @@ function _migrateMacroCommands(macro, updateData) {
  */
 async function purgeFlags(pack) {
   const cleanFlags = flags => {
-    const flags5e = flags.dnd5e || null;
-    return flags5e ? {dnd5e: flags5e} : {};
+    const flags5e = flags.charliednd5e || null;
+    return flags5e ? {charliednd5e: flags5e} : {};
   };
   await pack.configure({locked: false});
   const content = await pack.getDocuments();
@@ -81210,26 +81235,26 @@ const registerMethods = [registerSourceBooks, registerSpellLists];
 /* -------------------------------------------- */
 
 /**
- * Register package source books from `flags.dnd5e.sourceBooks`.
+ * Register package source books from `flags.charliednd5e.sourceBooks`.
  * @param {Module|System|World} manifest  Manifest from which to register data.
  * @returns {string|void}                 Description of the data registered.
  */
 function registerSourceBooks(manifest) {
-  if ( !manifest.flags.dnd5e?.sourceBooks ) return;
-  Object.assign(CONFIG.DND5E.sourceBooks, manifest.flags.dnd5e.sourceBooks);
+  if ( !manifest.flags.charliednd5e?.sourceBooks ) return;
+  Object.assign(CONFIG.DND5E.sourceBooks, manifest.flags.charliednd5e.sourceBooks);
   return "source books";
 }
 
 /* -------------------------------------------- */
 
 /**
- * Register package spell lists from `flags.dnd5e.spellLists`.
+ * Register package spell lists from `flags.charliednd5e.spellLists`.
  * @param {Module|System|World} manifest  Manifest from which to register data.
  * @returns {string|void}                 Description of the data registered.
  */
 function registerSpellLists(manifest) {
-  if ( !Array.isArray(manifest.flags.dnd5e?.spellLists) ) return;
-  manifest.flags.dnd5e.spellLists.forEach(uuid => dnd5e.registry.spellLists.register(uuid));
+  if ( !Array.isArray(manifest.flags.charliednd5e?.spellLists) ) return;
+  manifest.flags.charliednd5e.spellLists.forEach(uuid => dnd5e.registry.spellLists.register(uuid));
   return "spell lists";
 }
 
@@ -81260,12 +81285,12 @@ const setupMethods = [setupPackDisplay, setupPackSorting];
 /* -------------------------------------------- */
 
 /**
- * Set application based on `flags.dnd5e.display`.
+ * Set application based on `flags.charliednd5e.display`.
  * @param {Compendium} pack  Pack to set up.
  * @returns {string|void}    Description of the step.
  */
 function setupPackDisplay(pack) {
-  const display = pack.metadata.flags.display ?? pack.metadata.flags.dnd5e?.display;
+  const display = pack.metadata.flags.display ?? pack.metadata.flags.charliednd5e?.display;
   if ( display !== "table-of-contents" ) return;
   pack.applicationClass = TableOfContentsCompendium;
   return "table of contents";
@@ -81277,14 +81302,14 @@ let collectionSortingModes;
 let sortingChanged = false;
 
 /**
- * Set default sorting order based on `flags.dnd5e.sorting`.
+ * Set default sorting order based on `flags.charliednd5e.sorting`.
  * @param {Compendium} pack  Pack to set up.
  * @returns {string|void}    Description of the step.
  */
 function setupPackSorting(pack) {
   collectionSortingModes ??= game.settings.get("core", "collectionSortingModes") ?? {};
-  if ( !pack.metadata.flags.dnd5e?.sorting || collectionSortingModes[pack.metadata.id] ) return;
-  collectionSortingModes[pack.metadata.id] = pack.metadata.flags.dnd5e.sorting;
+  if ( !pack.metadata.flags.charliednd5e?.sorting || collectionSortingModes[pack.metadata.id] ) return;
+  collectionSortingModes[pack.metadata.id] = pack.metadata.flags.charliednd5e.sorting;
   sortingChanged = true;
   return "default sorting";
 }
@@ -81633,8 +81658,8 @@ class MessageRegistry {
    * @param {ChatMessage5e} message  Message to add to the registry.
    */
   static track(message) {
-    const origin = message.getFlag("dnd5e", "originatingMessage");
-    const type = message.getFlag("dnd5e", "roll.type");
+    const origin = message.getFlag("charliednd5e", "originatingMessage");
+    const type = message.getFlag("charliednd5e", "roll.type");
     if ( !origin || !type ) return;
     if ( !MessageRegistry.#messages.has(origin) ) MessageRegistry.#messages.set(origin, new Map());
     const originMap = MessageRegistry.#messages.get(origin);
@@ -81649,8 +81674,8 @@ class MessageRegistry {
    * @param {ChatMessage5e} message  Message to remove from the registry.
    */
   static untrack(message) {
-    const origin = message.getFlag("dnd5e", "originatingMessage");
-    const type = message.getFlag("dnd5e", "roll.type");
+    const origin = message.getFlag("charliednd5e", "originatingMessage");
+    const type = message.getFlag("charliednd5e", "roll.type");
     MessageRegistry.#messages.get(origin)?.get(type)?.delete(message.id);
   }
 }
@@ -82433,8 +82458,8 @@ Hooks.once("init", function() {
   game.dnd5e.tooltips = new Tooltips5e();
 
   // Remove honor & sanity from configuration if they aren't enabled
-  if ( !game.settings.get("dnd5e", "honorScore") ) delete DND5E.abilities.hon;
-  if ( !game.settings.get("dnd5e", "sanityScore") ) delete DND5E.abilities.san;
+  if ( !game.settings.get("charliednd5e", "honorScore") ) delete DND5E.abilities.hon;
+  if ( !game.settings.get("charliednd5e", "sanityScore") ) delete DND5E.abilities.san;
 
   // Legacy rules.
   if ( dnd5e.settings.rulesVersion === "legacy" ) applyLegacyRules();
@@ -82464,67 +82489,67 @@ Hooks.once("init", function() {
   // Register sheet application classes
   const DocumentSheetConfig = foundry.applications.apps.DocumentSheetConfig;
   DocumentSheetConfig.unregisterSheet(Actor, "core", foundry.appv1.sheets.ActorSheet);
-  DocumentSheetConfig.registerSheet(Actor, "dnd5e", CharacterActorSheet, {
+  DocumentSheetConfig.registerSheet(Actor, "charliednd5e", CharacterActorSheet, {
     types: ["character"],
     makeDefault: true,
     label: "DND5E.SheetClass.Character"
   });
-  DocumentSheetConfig.registerSheet(Actor, "dnd5e", NPCActorSheet, {
+  DocumentSheetConfig.registerSheet(Actor, "charliednd5e", NPCActorSheet, {
     types: ["npc"],
     makeDefault: true,
     label: "DND5E.SheetClass.NPC"
   });
-  DocumentSheetConfig.registerSheet(Actor, "dnd5e", VehicleActorSheet, {
+  DocumentSheetConfig.registerSheet(Actor, "charliednd5e", VehicleActorSheet, {
     types: ["vehicle"],
     makeDefault: true,
     label: "DND5E.SheetClass.Vehicle"
   });
-  DocumentSheetConfig.registerSheet(Actor, "dnd5e", GroupActorSheet, {
+  DocumentSheetConfig.registerSheet(Actor, "charliednd5e", GroupActorSheet, {
     types: ["group"],
     makeDefault: true,
     label: "DND5E.SheetClass.Group"
   });
-  DocumentSheetConfig.registerSheet(Actor, "dnd5e", EncounterActorSheet, {
+  DocumentSheetConfig.registerSheet(Actor, "charliednd5e", EncounterActorSheet, {
     types: ["encounter"],
     makeDefault: true,
     label: "DND5E.SheetClass.Encounter"
   });
 
   DocumentSheetConfig.unregisterSheet(Item, "core", foundry.appv1.sheets.ItemSheet);
-  DocumentSheetConfig.registerSheet(Item, "dnd5e", ItemSheet5e, {
+  DocumentSheetConfig.registerSheet(Item, "charliednd5e", ItemSheet5e, {
     makeDefault: true,
     label: "DND5E.SheetClass.Item"
   });
-  DocumentSheetConfig.unregisterSheet(Item, "dnd5e", ItemSheet5e, { types: ["container"] });
-  DocumentSheetConfig.registerSheet(Item, "dnd5e", ContainerSheet, {
+  DocumentSheetConfig.unregisterSheet(Item, "charliednd5e", ItemSheet5e, { types: ["container"] });
+  DocumentSheetConfig.registerSheet(Item, "charliednd5e", ContainerSheet, {
     makeDefault: true,
     types: ["container"],
     label: "DND5E.SheetClass.Container"
   });
 
-  DocumentSheetConfig.registerSheet(JournalEntry, "dnd5e", JournalEntrySheet5e, {
+  DocumentSheetConfig.registerSheet(JournalEntry, "charliednd5e", JournalEntrySheet5e, {
     makeDefault: true,
     label: "DND5E.SheetClass.JournalEntry"
   });
-  DocumentSheetConfig.registerSheet(JournalEntry, "dnd5e", JournalSheet5e, {
+  DocumentSheetConfig.registerSheet(JournalEntry, "charliednd5e", JournalSheet5e, {
     makeDefault: false,
     canConfigure: false,
     canBeDefault: false,
     label: "DND5E.SheetClass.JournalEntrySheetLegacy"
   });
-  DocumentSheetConfig.registerSheet(JournalEntryPage, "dnd5e", JournalClassPageSheet, {
+  DocumentSheetConfig.registerSheet(JournalEntryPage, "charliednd5e", JournalClassPageSheet, {
     label: "DND5E.SheetClass.ClassSummary",
     types: ["class", "subclass"]
   });
-  DocumentSheetConfig.registerSheet(JournalEntryPage, "dnd5e", JournalMapLocationPageSheet, {
+  DocumentSheetConfig.registerSheet(JournalEntryPage, "charliednd5e", JournalMapLocationPageSheet, {
     label: "DND5E.SheetClass.MapLocation",
     types: ["map"]
   });
-  DocumentSheetConfig.registerSheet(JournalEntryPage, "dnd5e", JournalRulePageSheet, {
+  DocumentSheetConfig.registerSheet(JournalEntryPage, "charliednd5e", JournalRulePageSheet, {
     label: "DND5E.SheetClass.Rule",
     types: ["rule"]
   });
-  DocumentSheetConfig.registerSheet(JournalEntryPage, "dnd5e", JournalSpellListPageSheet, {
+  DocumentSheetConfig.registerSheet(JournalEntryPage, "charliednd5e", JournalSpellListPageSheet, {
     label: "DND5E.SheetClass.SpellList",
     types: ["spells"]
   });
@@ -82532,23 +82557,23 @@ Hooks.once("init", function() {
   DocumentSheetConfig.unregisterSheet(RegionBehavior, "core", foundry.applications.sheets.RegionBehaviorConfig, {
     types: ["dnd5e.difficultTerrain", "dnd5e.rotateArea"]
   });
-  DocumentSheetConfig.registerSheet(RegionBehavior, "dnd5e", DifficultTerrainConfig, {
+  DocumentSheetConfig.registerSheet(RegionBehavior, "charliednd5e", DifficultTerrainConfig, {
     label: "DND5E.SheetClass.DifficultTerrain",
     types: ["dnd5e.difficultTerrain"]
   });
-  DocumentSheetConfig.registerSheet(RegionBehavior, "dnd5e", RotateAreaConfig, {
+  DocumentSheetConfig.registerSheet(RegionBehavior, "charliednd5e", RotateAreaConfig, {
     label: "DND5E.SheetClass.RotateArea",
     types: ["dnd5e.rotateArea"]
   });
 
-  DocumentSheetConfig.registerSheet(RollTable, "dnd5e", RollTableSheet5e, {
+  DocumentSheetConfig.registerSheet(RollTable, "charliednd5e", RollTableSheet5e, {
     makeDefault: true,
     label: "DND5E.SheetClass.RollTable"
   });
 
   CONFIG.Token.prototypeSheetClass = PrototypeTokenConfig5e;
   DocumentSheetConfig.unregisterSheet(TokenDocument, "core", foundry.applications.sheets.TokenConfig);
-  DocumentSheetConfig.registerSheet(TokenDocument, "dnd5e", TokenConfig5e, {
+  DocumentSheetConfig.registerSheet(TokenDocument, "charliednd5e", TokenConfig5e, {
     label: "DND5E.SheetClass.Token"
   });
 
@@ -82592,7 +82617,7 @@ function _configureCalendar() {
    */
   if ( Hooks.call("dnd5e.setupCalendar") === false ) return;
 
-  const calendar = game.settings.get("dnd5e", "calendar");
+  const calendar = game.settings.get("charliednd5e", "calendar");
   const calendarConfig = CONFIG.DND5E.calendar.calendars.find(c => c.value === calendar);
   if ( calendarConfig ) {
     CONFIG.time.worldCalendarConfig = calendarConfig.config;
@@ -82896,9 +82921,9 @@ Hooks.once("ready", function() {
 
   // Determine whether a system migration is required and feasible
   if ( !game.user.isGM ) return;
-  const cv = game.settings.get("dnd5e", "systemMigrationVersion") || game.world.flags.dnd5e?.version;
+  const cv = game.settings.get("charliednd5e", "systemMigrationVersion") || game.world.flags.charliednd5e?.version;
   const totalDocuments = game.actors.size + game.scenes.size + game.items.size;
-  if ( !cv && totalDocuments === 0 ) return game.settings.set("dnd5e", "systemMigrationVersion", game.system.version);
+  if ( !cv && totalDocuments === 0 ) return game.settings.set("charliednd5e", "systemMigrationVersion", game.system.version);
   if ( cv && !foundry.utils.isNewerVersion(game.system.flags.needsMigrationVersion, cv) ) return;
 
   // Compendium pack folder migration.
