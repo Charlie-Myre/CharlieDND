@@ -1,0 +1,8 @@
+2026/09/30-17:18:57.313 6420 Recovering log #103
+2026/09/30-17:18:57.326 6420 Delete type=0 #103
+2026/09/30-17:18:57.326 6420 Delete type=3 #102
+2026/09/30-18:33:43.917 4850 Level-0 table #107: started
+2026/09/30-18:33:43.918 4850 Level-0 table #107: 0 bytes OK
+2026/09/30-18:33:43.921 4850 Delete type=0 #105
+2026/09/30-18:33:43.922 4850 Manual compaction at level-0 from '!journal!0AGfrwZRzSG0vNKb' @ 72057594037927935 : 1 .. '!journal.pages!xxt7YT2t76JxNTel.9iCIjvYzMdxWPtd1' @ 0 : 0; will stop at (end)
+2026/09/30-18:33:43.922 4850 Manual compaction at level-1 from '!journal!0AGfrwZRzSG0vNKb' @ 72057594037927935 : 1 .. '!journal.pages!xxt7YT2t76JxNTel.9iCIjvYzMdxWPtd1' @ 0 : 0; will stop at (end)

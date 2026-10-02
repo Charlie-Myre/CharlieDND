@@ -1,0 +1,8 @@
+2026/09/30-17:18:57.427 6280 Recovering log #104
+2026/09/30-17:18:57.439 6280 Delete type=0 #104
+2026/09/30-17:18:57.439 6280 Delete type=3 #103
+2026/09/30-18:33:43.908 4850 Level-0 table #108: started
+2026/09/30-18:33:43.909 4850 Level-0 table #108: 0 bytes OK
+2026/09/30-18:33:43.910 4850 Delete type=0 #106
+2026/09/30-18:33:43.922 4850 Manual compaction at level-0 from '!folders!2Bw096HjE0HyGMwM' @ 72057594037927935 : 1 .. '!items.effects!phbsptStonecunni.SAbuNo2AO3XXtkdv' @ 0 : 0; will stop at (end)
+2026/09/30-18:33:43.922 4850 Manual compaction at level-1 from '!folders!2Bw096HjE0HyGMwM' @ 72057594037927935 : 1 .. '!items.effects!phbsptStonecunni.SAbuNo2AO3XXtkdv' @ 0 : 0; will stop at (end)
