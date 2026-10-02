@@ -8,7 +8,7 @@
         "verified": "14.361"
     },
     "url": "https://raw.githubusercontent.com/Charlie-Myre/CharlieDND/",
-    "manifest": "https://raw.githubusercontent.com/Charlie-Myre/CharlieDND/refs/heads/main/system.json",
+    "manifest": "https://raw.githubusercontent.com/Charlie-Myre/CharlieDND/refs/heads/0.0.2/system.json",
     "download": "https://github.com/Charlie-Myre/CharlieDND/archive/refs/tags/0.0.2.zip",
     "authors": [
         {
