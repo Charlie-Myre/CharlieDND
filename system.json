@@ -594,6 +594,25 @@
             "system": "dnd5e"
         },
         {
+            "name": "customitems",
+            "label": "Custom Items",
+            "path": "packs/customitems",
+            "type": "Item",
+            "ownership": {
+                "PLAYER": "OBSERVER",
+                "ASSISTANT": "OWNER"
+            },
+            "system": "dnd5e",
+            "flags": {
+                "dnd5e": {
+                    "sourceBook": "Custom Items",
+                    "types": [
+                        "weapon"
+                    ]
+                }
+            }
+        },
+        {
             "name": "actors24",
             "label": "Actors",
             "path": "packs/actors24",
@@ -631,6 +650,21 @@
         }
     ],
     "packFolders": [
+        {
+            "name": "Custom Items",
+            "sorting": "m",
+            "color": "#cd2c1e",
+            "folders": [
+                {
+                    "name": "Items",
+                    "sorting": "m",
+                    "color": "#b72c1f",
+                    "packs": [
+                        "customitems"
+                    ]
+                }
+            ]
+        },
         {
             "name": "D&D Modern Content",
             "color": "#cd2c1e",
@@ -729,7 +763,8 @@
             "sourceBooks": {
                 "SRD 5.1": "SOURCE.BOOK.SRD51",
                 "SRD 5.2": "SOURCE.BOOK.SRD52",
-                "Free Rules": "SOURCE.BOOK.FreeRules"
+                "Free Rules": "SOURCE.BOOK.FreeRules",
+                "Custom Items": "SOURCE.BOOK.CustomItems"
             }
         },
         "needsMigrationVersion": "5.3.0",
