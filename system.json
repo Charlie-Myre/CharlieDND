@@ -7,8 +7,8 @@
         "minimum": "13.347",
         "verified": "14"
     },
-    "url": "https://github.com/foundryvtt/dnd5e/",
-    "manifest": "https://raw.githubusercontent.com/foundryvtt/dnd5e/master/system.json",
+    "url": "https://raw.githubusercontent.com/Charlie-Myre/CharlieDND/",
+    "manifest": "https://raw.githubusercontent.com/Charlie-Myre/CharlieDND/refs/heads/main/system.json",
     "download": "https://github.com/foundryvtt/dnd5e/releases/download/release-5.3.3/dnd5e-release-5.3.3.zip",
     "authors": [
         {
