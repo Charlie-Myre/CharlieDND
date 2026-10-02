@@ -2,14 +2,14 @@
     "id": "charliednd5e",
     "title": "Dungeons & Dragons Fifth Edition",
     "description": "A system for playing the fifth edition of the world's most popular role-playing game in the Foundry Virtual Tabletop environment.",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "compatibility": {
         "minimum": "13.347",
         "verified": "14.361"
     },
     "url": "https://raw.githubusercontent.com/Charlie-Myre/CharlieDND/",
     "manifest": "https://raw.githubusercontent.com/Charlie-Myre/CharlieDND/refs/heads/main/system.json",
-    "download": "https://github.com/Charlie-Myre/CharlieDND/archive/refs/tags/0.0.1.zip",
+    "download": "https://github.com/Charlie-Myre/CharlieDND/archive/refs/tags/0.0.2.zip",
     "authors": [
         {
             "name": "Atropos",
@@ -594,6 +594,25 @@
             "system": "dnd5e"
         },
         {
+            "name": "customeitems",
+            "label": "Custome Items",
+            "path": "packs/customeitems",
+            "type": "Item",
+            "ownership": {
+                "PLAYER": "OBSERVER",
+                "ASSISTANT": "OWNER"
+            },
+            "system": "dnd5e",
+            "flags": {
+                "dnd5e": {
+                    "sourceBook": "Custome Items",
+                    "types": [
+                        "weapon"
+                    ]
+                }
+            }
+        },
+        {
             "name": "actors24",
             "label": "Actors",
             "path": "packs/actors24",
@@ -645,6 +664,14 @@
                 "actors24",
                 "equipment24",
                 "monsterfeatures24"
+            ]
+        },
+        {
+            "name": "Custom Content",
+            "sorting": "m",
+            "color": "#cd2c1e",
+            "packs": [
+                "customeitems"
             ]
         },
         {
@@ -729,7 +756,8 @@
             "sourceBooks": {
                 "SRD 5.1": "SOURCE.BOOK.SRD51",
                 "SRD 5.2": "SOURCE.BOOK.SRD52",
-                "Free Rules": "SOURCE.BOOK.FreeRules"
+                "Free Rules": "SOURCE.BOOK.FreeRules",
+                "Custome Items": "SOURCE.BOOK.CustomeItems"
             }
         },
         "needsMigrationVersion": "5.3.0",

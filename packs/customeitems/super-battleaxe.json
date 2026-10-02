@@ -1,0 +1,48 @@
+{
+  "name": "Super Battleaxe",
+  "type": "weapon",
+  "img": "icons/weapons/axes/battleaxe-broad.webp",
+  "system": {
+    "description": {
+      "value": "A custom weapon that behaves exactly like a Shortsword."
+    },
+    "type": {
+      "value": "martialM",
+      "baseItem": "shortsword"
+    },
+    "properties": [
+      "fin",
+      "lgt"
+    ],
+    "proficient": 1,
+    "damage": {
+      "base": {
+        "value": "1d6",
+        "types": {
+          "piercing": "piercing"
+        }
+      },
+      "versatile": {
+        "value": "1d8",
+        "types": {
+          "piercing": "piercing"
+        }
+      }
+    },
+    "range": {
+      "value": null,
+      "reach": 5,
+      "units": "ft"
+    },
+    "weight": {
+      "value": 2
+    },
+    "price": {
+      "value": 10
+    },
+    "source": {
+      "book": "Custome Items",
+      "custom": "Custom Pack"
+    }
+  }
+}
