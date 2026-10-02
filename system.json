@@ -5,7 +5,7 @@
     "version": "0.0.1",
     "compatibility": {
         "minimum": "13.347",
-        "verified": "14"
+        "verified": "14.361"
     },
     "url": "https://raw.githubusercontent.com/Charlie-Myre/CharlieDND/",
     "manifest": "https://raw.githubusercontent.com/Charlie-Myre/CharlieDND/refs/heads/main/system.json",
