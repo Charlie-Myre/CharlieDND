@@ -256,7 +256,7 @@
         {
             "name": "heroes",
             "label": "Starter Heroes",
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "path": "packs/heroes",
             "type": "Actor",
             "private": false,
@@ -272,7 +272,7 @@
         {
             "name": "monsters",
             "label": "Monsters (SRD)",
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "path": "packs/monsters",
             "type": "Actor",
             "private": false,
@@ -288,7 +288,7 @@
         {
             "name": "items",
             "label": "Items (SRD)",
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "path": "packs/items",
             "type": "Item",
             "private": false,
@@ -310,7 +310,7 @@
         {
             "name": "tradegoods",
             "label": "Trade Goods (SRD)",
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "path": "packs/tradegoods",
             "type": "Item",
             "private": false,
@@ -326,7 +326,7 @@
         {
             "name": "spells",
             "label": "Spells (SRD)",
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "path": "packs/spells",
             "type": "Item",
             "private": false,
@@ -343,7 +343,7 @@
         {
             "name": "backgrounds",
             "label": "Backgrounds (SRD)",
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "path": "packs/backgrounds",
             "type": "Item",
             "private": false,
@@ -360,7 +360,7 @@
         {
             "name": "classes",
             "label": "Classes (SRD)",
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "path": "packs/classes",
             "type": "Item",
             "private": false,
@@ -376,7 +376,7 @@
         {
             "name": "subclasses",
             "label": "Subclasses (SRD)",
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "path": "packs/subclasses",
             "type": "Item",
             "private": false,
@@ -392,7 +392,7 @@
         {
             "name": "classfeatures",
             "label": "Class & Subclass Features (SRD)",
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "path": "packs/classfeatures",
             "type": "Item",
             "private": false,
@@ -409,7 +409,7 @@
         {
             "name": "races",
             "label": "Races (SRD)",
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "path": "packs/races",
             "type": "Item",
             "private": false,
@@ -426,7 +426,7 @@
         {
             "name": "monsterfeatures",
             "label": "Monster Features (SRD)",
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "path": "packs/monsterfeatures",
             "type": "Item",
             "private": false,
@@ -443,7 +443,7 @@
         {
             "name": "rules",
             "label": "Rules (SRD)",
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "path": "packs/rules",
             "type": "JournalEntry",
             "private": false,
@@ -456,7 +456,7 @@
         {
             "name": "tables",
             "label": "Tables (SRD)",
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "path": "packs/tables",
             "type": "RollTable",
             "private": false,
@@ -471,7 +471,7 @@
                 "PLAYER": "OBSERVER",
                 "ASSISTANT": "OWNER"
             },
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "flags": {
                 "display": "table-of-contents"
             }
@@ -485,7 +485,7 @@
                 "PLAYER": "OBSERVER",
                 "ASSISTANT": "OWNER"
             },
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "flags": {
                 "dnd5e": {
                     "sourceBook": "SRD 5.2",
@@ -506,7 +506,7 @@
                 "PLAYER": "OBSERVER",
                 "ASSISTANT": "OWNER"
             },
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "flags": {
                 "dnd5e": {
                     "sourceBook": "SRD 5.2",
@@ -527,7 +527,7 @@
                 "PLAYER": "OBSERVER",
                 "ASSISTANT": "OWNER"
             },
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "flags": {
                 "dnd5e": {
                     "sourceBook": "SRD 5.2",
@@ -546,7 +546,7 @@
                 "PLAYER": "OBSERVER",
                 "ASSISTANT": "OWNER"
             },
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "flags": {
                 "dnd5e": {
                     "sorting": "m",
@@ -566,7 +566,7 @@
                 "PLAYER": "OBSERVER",
                 "ASSISTANT": "OWNER"
             },
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "flags": {
                 "dnd5e": {
                     "sourceBook": "SRD 5.2",
@@ -591,7 +591,7 @@
                 "PLAYER": "OBSERVER",
                 "ASSISTANT": "OWNER"
             },
-            "system": "dnd5e"
+            "system": "charliednd5e"
         },
         {
             "name": "customitems",
@@ -602,7 +602,7 @@
                 "PLAYER": "OBSERVER",
                 "ASSISTANT": "OWNER"
             },
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "flags": {
                 "dnd5e": {
                     "sourceBook": "Custom Items",
@@ -621,7 +621,7 @@
                 "PLAYER": "OBSERVER",
                 "ASSISTANT": "OWNER"
             },
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "flags": {
                 "dnd5e": {
                     "sorting": "m",
@@ -637,7 +637,7 @@
             "ownership": {
                 "ASSISTANT": "OWNER"
             },
-            "system": "dnd5e",
+            "system": "charliednd5e",
             "flags": {
                 "dnd5e": {
                     "sourceBook": "SRD 5.2",
