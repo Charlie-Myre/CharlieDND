@@ -677,21 +677,6 @@
               ],
     "packFolders":  [
                         {
-                            "name":  "Custom Items",
-                            "sorting":  "m",
-                            "color":  "#cd2c1e",
-                            "folders":  [
-                                            {
-                                                "name":  "Items",
-                                                "sorting":  "m",
-                                                "color":  "#b72c1f",
-                                                "packs":  [
-                                                              "customitems"
-                                                          ]
-                                            }
-                                        ]
-                        },
-                        {
                             "name":  "D\u0026D Modern Content",
                             "color":  "#cd2c1e",
                             "sorting":  "m",
@@ -708,13 +693,14 @@
                                       ]
                         },
                         {
-                            "name":  "D\u0026D Legacy Content",
+                            "name":  "D\u0026D Custom Items",
                             "sorting":  "m",
                             "color":  "#cd2c1e",
                             "packs":  [
                                           "rules",
                                           "tables",
-                                          "heroes"
+                                          "heroes",
+                                          "customitems"
                                       ],
                             "folders":  [
                                             {
