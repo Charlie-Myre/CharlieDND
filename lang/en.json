@@ -15,7 +15,8 @@
   "Activity": "Activity",
   "Advancement": "Advancement",
   "Warning": {
-    "SelectType": "{name} type must be selected for creation."
+    "SelectType": "{name} type must be selected for creation.",
+    "AttunementClass": "Only a Barbarian can attune to this armor."
   }
 },
 

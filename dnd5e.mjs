@@ -23018,6 +23018,19 @@ class Item5e extends SystemDocumentMixin(Item) {
   }
 
   /* -------------------------------------------- */
+
+  /** @inheritDoc */
+  async _preUpdate(changed, options, user) {
+    if ( (await super._preUpdate(changed, options, user)) === false ) return false;
+    const attuned = changed["system.attuned"] ?? changed.system?.attuned;
+    if ( !attuned || (this.flags.charliednd5e?.attunementClass !== "barbarian") || this.actor?.classes?.barbarian ) {
+      return;
+    }
+    ui.notifications.warn(game.i18n.localize("DOCUMENT.DND5E.Warning.AttunementClass"));
+    return false;
+  }
+
+  /* -------------------------------------------- */
   /*  Item Properties                             */
   /* -------------------------------------------- */
 
@@ -25999,6 +26012,11 @@ class AttributesFields {
     // Compute total AC and return
     ac.min = simplifyBonus(ac.min, rollData);
     ac.bonus = simplifyBonus(ac.bonus, rollData);
+    const armor = ac.equippedArmor;
+    const isRaging = this.parent.effects.some(effect => effect.name.toLowerCase() === "rage" && !effect.disabled);
+    if ( armor?.flags.charliednd5e?.rageArmorBonus && armor.system.attuned && this.parent.classes?.barbarian && isRaging ) {
+      ac.bonus += 1;
+    }
     ac.value = Math.max(ac.min, ac.base + ac.shield + ac.bonus + ac.cover);
   }
 
@@ -64810,6 +64828,11 @@ class InventoryElement extends (foundry.applications.elements.AdoptableHTMLEleme
    * @protected
    */
   _onToggleAttunement(item) {
+    if ( !item.system.attuned && (item.flags.charliednd5e?.attunementClass === "barbarian")
+      && !item.actor?.classes?.barbarian ) {
+      ui.notifications.warn(game.i18n.localize("DOCUMENT.DND5E.Warning.AttunementClass"));
+      return;
+    }
     return item.update({ "system.attuned": !item.system.attuned });
   }
 

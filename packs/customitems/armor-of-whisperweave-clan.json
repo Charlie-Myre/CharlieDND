@@ -1,0 +1,93 @@
+{
+  "_id": "whisperweaveArmor",
+  "name": "Armor of the Whisperweave Clan",
+  "type": "equipment",
+  "img": "icons/equipment/chest/breastplate-banded-steel.webp",
+  "system": {
+    "description": {
+      "value": "Requires attunement by a Barbarian. This magical medium armor is leather reinforced with metal spikes. Its spikes deal 3 piercing damage to a creature when you successfully grapple it or when it grapples you.",
+      "chat": ""
+    },
+    "price": {
+      "value": 75,
+      "denomination": "gp"
+    },
+    "source": {
+      "custom": "Custom Pack",
+      "rules": "2014",
+      "license": "",
+      "book": "Custom Items"
+    },
+    "identified": true,
+    "unidentified": {
+      "description": ""
+    },
+    "container": null,
+    "quantity": 1,
+    "weight": {
+      "value": 45,
+      "units": "lb"
+    },
+    "rarity": "",
+    "attunement": "required",
+    "attuned": false,
+    "equipped": false,
+    "cover": null,
+    "crewed": false,
+    "uses": {
+      "max": "",
+      "spent": 0,
+      "recovery": []
+    },
+    "armor": {
+      "value": 14,
+      "magicalBonus": null,
+      "dex": 2
+    },
+    "hp": {
+      "value": null,
+      "max": null,
+      "dt": null,
+      "conditions": ""
+    },
+    "type": {
+      "value": "medium",
+      "baseItem": "spiked-armor"
+    },
+    "properties": [
+      "mgc",
+      "stealthDisadvantage"
+    ],
+    "speed": {
+      "value": null,
+      "conditions": ""
+    },
+    "strength": null,
+    "proficient": null,
+    "activities": {},
+    "identifier": "armor-of-the-whisperweave-clan"
+  },
+  "effects": [],
+  "folder": null,
+  "sort": 0,
+  "ownership": {
+    "default": 0
+  },
+  "flags": {
+    "charliednd5e": {
+      "sourceBook": "Custom Items",
+      "attunementClass": "barbarian",
+      "rageArmorBonus": true
+    }
+  },
+  "_stats": {
+    "duplicateSource": null,
+    "coreVersion": "14.361",
+    "systemId": "charliednd5e",
+    "systemVersion": "0.0.2",
+    "createdTime": 1791235200000,
+    "modifiedTime": 1791235200000,
+    "lastModifiedBy": null,
+    "exportSource": null
+  }
+}
