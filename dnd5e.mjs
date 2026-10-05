@@ -25944,6 +25944,12 @@ class AttributesFields {
       else obj.armors.push(equip);
       return obj;
     }, { armors: [], shields: [] });
+    const armor = armors[0];
+    const rageArmorEffect = armor?.effects.find(effect => effect.flags.charliednd5e?.rageOnly);
+    const rageArmorChange = rageArmorEffect?.system.changes.find(change => change.key === "system.attributes.ac.bonus");
+    const isRaging = this.parent.effects.some(effect => effect.name.toLowerCase() === "rage" && !effect.disabled);
+    const rageArmorBonus = rageArmorEffect && !rageArmorEffect.disabled && armor.system.attuned
+      && this.parent.classes?.barbarian && isRaging ? Number(rageArmorChange?.value) || 0 : 0;
 
     // Set stealth disadvantage
     if ( armors[0]?.system.properties.has("stealthDisadvantage") ) {
@@ -25957,7 +25963,7 @@ class AttributesFields {
 
       // Flat AC (no additional bonuses)
       case "flat":
-        ac.value = Number(ac.flat);
+        ac.value = Number(ac.flat) + rageArmorBonus;
         return;
 
       // Natural AC (includes bonuses)
@@ -26012,13 +26018,7 @@ class AttributesFields {
     // Compute total AC and return
     ac.min = simplifyBonus(ac.min, rollData);
     ac.bonus = simplifyBonus(ac.bonus, rollData);
-    const armor = ac.equippedArmor;
-    const isRaging = this.parent.effects.some(effect => effect.name.toLowerCase() === "rage" && !effect.disabled);
-    const rageArmorEffect = armor?.effects.find(effect => effect.flags.charliednd5e?.rageOnly);
-    const rageArmorBonus = rageArmorEffect?.system.changes.find(change => change.key === "system.attributes.ac.bonus")?.value;
-    if ( rageArmorEffect && !rageArmorEffect.disabled && armor.system.attuned && this.parent.classes?.barbarian && isRaging ) {
-      ac.bonus += Number(rageArmorBonus) || 0;
-    }
+    ac.bonus += rageArmorBonus;
     ac.value = Math.max(ac.min, ac.base + ac.shield + ac.bonus + ac.cover);
   }
 
