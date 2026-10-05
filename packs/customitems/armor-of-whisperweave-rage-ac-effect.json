@@ -1,0 +1,47 @@
+{
+  "_id": "wwClanRageAC",
+  "type": "base",
+  "img": "icons/equipment/shield/heater-steel-crystal.webp",
+  "system": {
+    "changes": [
+      {
+        "key": "system.attributes.ac.bonus",
+        "value": 1,
+        "priority": null,
+        "type": "add"
+      }
+    ]
+  },
+  "disabled": false,
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "origin": "Compendium.charliednd5e.customitems.Item.whisperweaveArmor",
+  "transfer": false,
+  "name": "Whisperweave Rage Guard",
+  "description": "+1 AC while attuned to and wearing the Armor of the Whisperweave Clan during Rage.",
+  "statuses": [],
+  "flags": {
+    "charliednd5e": {
+      "rageOnly": true
+    }
+  },
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "coreVersion": "14.361",
+    "systemId": "charliednd5e",
+    "systemVersion": "0.0.2",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null,
+    "exportSource": null
+  },
+  "sort": 0,
+  "start": null,
+  "showIcon": 1,
+  "folder": null
+}

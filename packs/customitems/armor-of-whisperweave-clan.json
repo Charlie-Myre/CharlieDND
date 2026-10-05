@@ -67,7 +67,9 @@
     "activities": {},
     "identifier": "armor-of-the-whisperweave-clan"
   },
-  "effects": [],
+  "effects": [
+    "wwClanRageAC"
+  ],
   "folder": null,
   "sort": 0,
   "ownership": {
@@ -76,8 +78,7 @@
   "flags": {
     "charliednd5e": {
       "sourceBook": "Custom Items",
-      "attunementClass": "barbarian",
-      "rageArmorBonus": true
+      "attunementClass": "barbarian"
     }
   },
   "_stats": {

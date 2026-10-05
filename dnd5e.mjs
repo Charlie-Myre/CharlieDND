@@ -26014,8 +26014,10 @@ class AttributesFields {
     ac.bonus = simplifyBonus(ac.bonus, rollData);
     const armor = ac.equippedArmor;
     const isRaging = this.parent.effects.some(effect => effect.name.toLowerCase() === "rage" && !effect.disabled);
-    if ( armor?.flags.charliednd5e?.rageArmorBonus && armor.system.attuned && this.parent.classes?.barbarian && isRaging ) {
-      ac.bonus += 1;
+    const rageArmorEffect = armor?.effects.find(effect => effect.flags.charliednd5e?.rageOnly);
+    const rageArmorBonus = rageArmorEffect?.system.changes.find(change => change.key === "system.attributes.ac.bonus")?.value;
+    if ( rageArmorEffect && !rageArmorEffect.disabled && armor.system.attuned && this.parent.classes?.barbarian && isRaging ) {
+      ac.bonus += Number(rageArmorBonus) || 0;
     }
     ac.value = Math.max(ac.min, ac.base + ac.shield + ac.bonus + ac.cover);
   }
