@@ -2,14 +2,14 @@
     "id":  "charliednd5e",
     "title":  "Dungeons \u0026 Dragons Fifth Edition",
     "description":  "A system for playing the fifth edition of the world\u0027s most popular role-playing game in the Foundry Virtual Tabletop environment.",
-    "version":  "0.0.2",
+    "version":  "0.0.3",
     "compatibility":  {
                           "minimum":  "13.347",
                           "verified":  "14.361"
                       },
     "url":  "https://raw.githubusercontent.com/Charlie-Myre/CharlieDND/",
     "manifest":  "https://raw.githubusercontent.com/Charlie-Myre/CharlieDND/refs/heads/main/system.json",
-    "download":  "https://github.com/Charlie-Myre/CharlieDND/archive/refs/tags/0.0.2.zip",
+    "download":  "https://github.com/Charlie-Myre/CharlieDND/archive/refs/tags/0.0.3.zip",
     "authors":  [
                     {
                         "name":  "Atropos",
