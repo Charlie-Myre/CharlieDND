@@ -25947,8 +25947,11 @@ class AttributesFields {
     const armor = armors[0];
     const rageArmorEffect = armor?.effects.find(effect => effect.flags.charliednd5e?.rageOnly);
     const rageArmorChange = rageArmorEffect?.system.changes.find(change => change.key === "system.attributes.ac.bonus");
+    const rageArmorApplied = rageArmorEffect && this.parent.effects.some(effect =>
+      (effect.origin === rageArmorEffect.uuid) && !effect.disabled
+    );
     const isRaging = this.parent.effects.some(effect => effect.name.toLowerCase() === "rage" && !effect.disabled);
-    const rageArmorBonus = rageArmorEffect && !rageArmorEffect.disabled && armor.system.attuned
+    const rageArmorBonus = rageArmorApplied && armor.system.attuned
       && this.parent.classes?.barbarian && isRaging ? Number(rageArmorChange?.value) || 0 : 0;
 
     // Set stealth disadvantage

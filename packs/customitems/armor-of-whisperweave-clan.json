@@ -64,7 +64,76 @@
     },
     "strength": null,
     "proficient": null,
-    "activities": {},
+    "activities": {
+      "whisperweaveRageGuard": {
+        "_id": "whisperweaveRageGuard",
+        "type": "utility",
+        "activation": {
+          "type": "special",
+          "value": null,
+          "condition": "Use while raging",
+          "override": false
+        },
+        "consumption": {
+          "targets": [],
+          "scaling": {
+            "allowed": false,
+            "max": ""
+          },
+          "spellSlot": true
+        },
+        "description": {
+          "chatFlavor": "Apply the Whisperweave Rage Guard effect to yourself while raging."
+        },
+        "duration": {
+          "concentration": false,
+          "value": "",
+          "units": "",
+          "special": "",
+          "override": false
+        },
+        "effects": [
+          {
+            "_id": "wwClanRageAC"
+          }
+        ],
+        "range": {
+          "units": "self",
+          "special": "",
+          "override": false
+        },
+        "target": {
+          "template": {
+            "count": "",
+            "contiguous": false,
+            "type": "",
+            "size": "",
+            "width": "",
+            "height": "",
+            "units": ""
+          },
+          "affects": {
+            "count": "",
+            "type": "self",
+            "choice": false,
+            "special": ""
+          },
+          "prompt": false,
+          "override": false
+        },
+        "uses": {
+          "spent": 0,
+          "recovery": []
+        },
+        "sort": 0,
+        "roll": {
+          "formula": "",
+          "name": "",
+          "prompt": false,
+          "visible": false
+        }
+      }
+    },
     "identifier": "armor-of-the-whisperweave-clan"
   },
   "effects": [
